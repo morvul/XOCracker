@@ -15,6 +15,8 @@ namespace XOCracker
         private int _rows;
         private Bitmap _turnSprite;
         private Bitmap _freeCellSprite;
+        private Bitmap _oCellSprite;
+        private Bitmap _xCellSprite;
 
         public bool HasChanges { get; set; }
 
@@ -58,6 +60,33 @@ namespace XOCracker
         }
 
 
+        public Bitmap OCellSprite
+        {
+            get { return _oCellSprite; }
+            set
+            {
+                if (_oCellSprite != value)
+                {
+                    _oCellSprite = value;
+                    HasChanges = true;
+                }
+            }
+        }
+
+        public Bitmap XCellSprite
+        {
+            get { return _xCellSprite; }
+            set
+            {
+                if (_xCellSprite != value)
+                {
+                    _xCellSprite = value;
+                    HasChanges = true;
+                }
+            }
+        }
+
+
         public int Columns
         {
             get { return _columns; }
@@ -84,10 +113,9 @@ namespace XOCracker
             }
         }
 
-
         public bool IsReady()
         {
-            return StartSprite != null && TurnSprite != null && FreeCellSprite != null
+            return StartSprite != null && TurnSprite != null && FreeCellSprite != null && OCellSprite != null && XCellSprite != null
                 && Rows > 0 && Columns > 0;
         }
 
@@ -96,6 +124,8 @@ namespace XOCracker
             StartSprite = null;
             TurnSprite = null;
             FreeCellSprite = null;
+            OCellSprite = null;
+            XCellSprite = null;
             Rows = 0;
             Columns = 0;
         }
@@ -112,6 +142,8 @@ namespace XOCracker
                     StartSprite = FromFile(nameof(StartSprite));
                     TurnSprite = FromFile(nameof(TurnSprite));
                     FreeCellSprite = FromFile(nameof(FreeCellSprite));
+                    OCellSprite = FromFile(nameof(OCellSprite));
+                    XCellSprite = FromFile(nameof(XCellSprite));
                 }
             }
             catch (Exception excpt)
@@ -140,23 +172,27 @@ namespace XOCracker
             Settings.Default.Rows = Rows;
             Settings.Default.Columns = Columns;
             Settings.Default.Save();
-                var presetDir = Path.Combine(Environment.CurrentDirectory, GamePresetDir);
-                if (!Directory.Exists(presetDir))
-                {
-                    Directory.CreateDirectory(presetDir);
-                }
-                else
-                {
-                    var startSpriteFileName = Path.Combine(presetDir, nameof(StartSprite) + ".bmp");
-                    StartSprite?.Save(startSpriteFileName, ImageFormat.Bmp);
-                    var turnSpriteFileName = Path.Combine(presetDir, nameof(TurnSprite) + ".bmp");
-                    TurnSprite?.Save(turnSpriteFileName);
-                    var freeCellSpriteFileName = Path.Combine(presetDir, nameof(FreeCellSprite) + ".bmp");
-                    FreeCellSprite?.Save(freeCellSpriteFileName);
-                }
+            var presetDir = Path.Combine(Environment.CurrentDirectory, GamePresetDir);
+            if (!Directory.Exists(presetDir))
+            {
+                Directory.CreateDirectory(presetDir);
+            }
+            else
+            {
+                var startSpriteFileName = Path.Combine(presetDir, nameof(StartSprite) + ".bmp");
+                StartSprite?.Save(startSpriteFileName, ImageFormat.Bmp);
+                var turnSpriteFileName = Path.Combine(presetDir, nameof(TurnSprite) + ".bmp");
+                TurnSprite?.Save(turnSpriteFileName);
+                var freeCellSpriteFileName = Path.Combine(presetDir, nameof(FreeCellSprite) + ".bmp");
+                FreeCellSprite?.Save(freeCellSpriteFileName);
+                var oCellSpriteFileName = Path.Combine(presetDir, nameof(OCellSprite) + ".bmp");
+                OCellSprite?.Save(oCellSpriteFileName);
+                var xCellSpriteFileName = Path.Combine(presetDir, nameof(XCellSprite) + ".bmp");
+                XCellSprite?.Save(xCellSpriteFileName);
+            }
 
-                HasChanges = false;
-           
+            HasChanges = false;
+
         }
 
         private Bitmap FromFile(string imgName)

@@ -7,6 +7,7 @@ using System.IO;
 using System.Windows;
 using System.Windows.Forms;
 using System.Windows.Media.Imaging;
+using System.Windows.Threading;
 using MouseEventArgs = System.Windows.Input.MouseEventArgs;
 using Size = System.Drawing.Size;
 
@@ -15,7 +16,7 @@ namespace XOCracker
     /// <summary>
     /// Логика взаимодействия для ScreenshotRegion.xaml
     /// </summary>
-    public partial class ScreenshotRegion : Window
+    public partial class ScreenshotRegion
     {
         public static readonly RoutedCommand MyCommand = new RoutedCommand();
         private readonly RectangleGeometry _region;
@@ -71,11 +72,11 @@ namespace XOCracker
         {
             if (_isMouseDown)
             {
-                double curX = e.GetPosition(null).X;
-                double curY = e.GetPosition(null).Y;
-                _width = Math.Abs(curX - _startX);
-                _height = Math.Abs(curY - _startY);
-                _region.Rect = new Rect(GetMin(_startX, curX), GetMin(_startY, curY), _width, _height);
+                _curX = e.GetPosition(null).X;
+                _curY = e.GetPosition(null).Y;
+                _width = Math.Abs(_curX - _startX);
+                _height = Math.Abs(_curY - _startY);
+                _region.Rect = new Rect(GetMin(_startX, _curX), GetMin(_startY, _curY), _width, _height);
                 var regionBorder = new System.Windows.Shapes.Rectangle();
                 SolidColorBrush brush = new SolidColorBrush(Colors.White) { Opacity = 0.5 };
                 regionBorder.Stroke = brush;
@@ -86,33 +87,14 @@ namespace XOCracker
                 Canvas.Children.Add(regionBorder);
                 System.Windows.Controls.Canvas.SetLeft(regionBorder, _region.Rect.X);
                 System.Windows.Controls.Canvas.SetTop(regionBorder, _region.Rect.Y);
-                if (e.LeftButton == MouseButtonState.Released)
-                {
-                    if (_width >= MinImgSize || _height >= MinImgSize)
-                    {
-                        var picture = CaptureScreen(GetMin(_startX, _curX), GetMin(_startY, _curY), _width, _height);
-                        if (picture != null)
-                        {
-                            Picture = picture;
-                        }
-                    }
-                    else
-                    {
-                        Picture = PixelTraceCapture((int)_curX, (int)_curY);
-                    }
-
-                    _curX = _curY = _startX = _startY = 0;
-                    _isMouseDown = false;
-                    DialogResult = Picture != null;
-                    Close();
-                }
+                Screener_MouseUp(e.LeftButton);
             }
         }
 
         private Bitmap PixelTraceCapture(int curX, int curY)
         {
-            Canvas.Children.Clear();
-            Cnv.Data = null;
+            Cnv.Visibility = Visibility.Collapsed;
+            Cnv.Dispatcher.Invoke(DispatcherPriority.Render, new Action(() =>{}));
             var screen = Screen.FromHandle(new System.Windows.Interop.WindowInteropHelper(this).Handle);
             var screenshot = CaptureScreen(0, 0, screen.Bounds.Width, screen.Bounds.Height);
             var piColor = screenshot.GetPixel(curX, curY);
@@ -124,8 +106,8 @@ namespace XOCracker
             var y2 = curY;
             while (++x2 < screen.Bounds.Width && screenshot.GetPixel(x2, curY) == piColor);
             while (++y2 < screen.Bounds.Height && screenshot.GetPixel(curX, y2) == piColor);
-            var width = x2 - x1;
-            var height = y2 - y1;
+            var width = --x2 - ++x1;
+            var height = --y2 - ++y1;
             return CaptureScreen(x1, y1, width, height);
         }
 
@@ -191,6 +173,35 @@ namespace XOCracker
             public static extern IntPtr GetDC(IntPtr hwnd);
             [DllImport("User32.dll")]
             public static extern void ReleaseDC(IntPtr hwnd, IntPtr dc);
+        }
+
+        private void Canvas_MouseUp(object sender, MouseButtonEventArgs e)
+        {
+            Screener_MouseUp(e.LeftButton);
+        }
+
+        private void Screener_MouseUp(MouseButtonState mouseState)
+        {
+            if (mouseState == MouseButtonState.Released && _isMouseDown)
+            {
+                if (_width >= MinImgSize || _height >= MinImgSize)
+                {
+                    var picture = CaptureScreen(GetMin(_startX, _curX), GetMin(_startY, _curY), _width, _height);
+                    if (picture != null)
+                    {
+                        Picture = picture;
+                    }
+                }
+                else
+                {
+                    Picture = PixelTraceCapture((int)_curX, (int)_curY);
+                }
+
+                _curX = _curY = _startX = _startY = 0;
+                _isMouseDown = false;
+                DialogResult = Picture != null;
+                Close();
+            }
         }
     }
 }

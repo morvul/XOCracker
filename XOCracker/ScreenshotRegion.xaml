@@ -7,7 +7,7 @@
         ShowInTaskbar="False"
         Background="#01000000"
         AllowsTransparency="True"
-        Topmost="False"
+        Topmost="True"
         PreviewMouseDown="Window_MouseDown" 
         PreviewMouseMove="Window_MouseMove"
         >
@@ -15,7 +15,7 @@
         <CommandBinding Command="{x:Static xoCracker:ScreenshotRegion.MyCommand}" Executed="AbortCommand"/>
     </Window.CommandBindings>
     <Grid>
-        <Canvas Name="Canvas"/>
-        <Path x:Name="Cnv" Fill="Black" Opacity="0.8"/>
+        <Canvas Name="Canvas" />
+        <Path x:Name="Cnv" Fill="Black" Opacity="0.8" MouseUp="Canvas_MouseUp"/>
     </Grid>
 </Window>
