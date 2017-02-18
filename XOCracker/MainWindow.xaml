@@ -1,0 +1,71 @@
+﻿<Window x:Class="XOCracker.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d"
+        Title="XOCracker" Height="350" Width="525">
+    <Window.Resources>
+        <Style x:Key="Flat" TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
+            <Setter Property="Control.Background" Value="#01000000" />
+            <Setter Property="Control.BorderBrush" Value="{x:Null}" />
+            <Style.Triggers>
+                <Trigger Property="Control.IsMouseOver" Value="True">
+                    <Setter Property="Control.Background" Value="{x:Null}" />
+                    <Setter Property="Control.BorderBrush" Value="{x:Null}" />
+                    <Setter Property="Control.FontWeight" Value="Bold" />
+                </Trigger>
+                <Trigger Property="Control.IsFocused" Value="True">
+                    <Setter Property="Control.FontWeight" Value="Bold" />
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+    </Window.Resources>
+    <Grid>
+        <TabControl>
+            <TabItem Header="Presets">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <GroupBox Header="Start button">
+                        <Button Name="StartSpriteSelectionCommand" 
+                                    Click="Button_Click" 
+                                    Style="{StaticResource Flat}">
+                            <UniformGrid Columns="1">
+                                <Image Name="StartSprite" />
+                                <TextBlock Name="StartSpriteText">Click to select a sprite region</TextBlock>
+                            </UniformGrid>
+                        </Button>
+                    </GroupBox>
+                    <GroupBox Grid.Column="1" Header="Board">
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                            </Grid.RowDefinitions>
+                            <GroupBox Header="Size">
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition/>
+                                        <ColumnDefinition/>
+                                        <ColumnDefinition/>
+                                        <ColumnDefinition/>
+                                    </Grid.ColumnDefinitions>
+
+                                    <Label Content="Rows"/>
+                                    <TextBox Name="BoardRows" Grid.Column="1" PreviewTextInput="NumberValidationTextBox" DataObject.Pasting="TextBoxPasting"/>
+                                    <Label Grid.Column="2" Content="Columns"/>
+                                    <TextBox Name="BoardColumns" Grid.Column="3"/>
+                                </Grid>
+                            </GroupBox>
+                        </Grid>
+                    </GroupBox>
+                </Grid>
+            </TabItem>
+            <TabItem Name="GameProcessTab" Header="Game process">
+            </TabItem>
+        </TabControl>
+    </Grid>
+</Window>
