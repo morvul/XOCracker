@@ -7,8 +7,8 @@
         Title="XOCracker" Height="350" Width="525">
     <Window.Resources>
         <Style x:Key="Flat" TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
-            <Setter Property="Control.Background" Value="#01000000" />
-            <Setter Property="Control.BorderBrush" Value="{x:Null}" />
+            <Setter Property="Background" Value="#01000000" />
+            <Setter Property="BorderBrush" Value="{x:Null}" />
             <Style.Triggers>
                 <Trigger Property="Control.IsMouseOver" Value="True">
                     <Setter Property="Control.Background" Value="{x:Null}" />
@@ -20,6 +20,13 @@
                 </Trigger>
             </Style.Triggers>
         </Style>
+        <Style TargetType="TextBox" BasedOn="{StaticResource {x:Type TextBox}}">
+            <Setter Property="Height" Value="20"/>
+        </Style>
+        <Style TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
+            <Setter Property="Padding" Value="2"/>
+            <Setter Property="Margin" Value="2"/>
+        </Style>
     </Window.Resources>
     <Grid>
         <TabControl>
@@ -29,9 +36,15 @@
                         <ColumnDefinition Width="*"/>
                         <ColumnDefinition Width="*"/>
                     </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+
                     <GroupBox Header="Start button">
                         <Button Name="StartSpriteSelectionCommand" 
-                                    Click="Button_Click" 
+                                    Click="StartSpriteSelectionCommand_Click" 
                                     Style="{StaticResource Flat}">
                             <UniformGrid Columns="1">
                                 <Image Name="StartSprite" />
@@ -39,11 +52,21 @@
                             </UniformGrid>
                         </Button>
                     </GroupBox>
-                    <GroupBox Grid.Column="1" Header="Board">
+                    <GroupBox Grid.Column="0" Grid.Row="1" Header="Turn indicator">
+                        <Button Name="TurnSpriteSelectionCommand" 
+                                    Click="TurnSpriteSelectionCommand_Click" 
+                                    Style="{StaticResource Flat}">
+                            <UniformGrid Columns="1">
+                                <Image Name="TurnSprite" />
+                                <TextBlock Name="TurnSpriteText">Click to select a sprite region</TextBlock>
+                            </UniformGrid>
+                        </Button>
+                    </GroupBox>
+                    <GroupBox Grid.Column="1" Grid.Row="0" Header="Board">
                         <Grid>
                             <Grid.RowDefinitions>
                                 <RowDefinition Height="Auto"/>
-                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="*"/>
                             </Grid.RowDefinitions>
                             <GroupBox Header="Size">
                                 <Grid>
@@ -55,13 +78,38 @@
                                     </Grid.ColumnDefinitions>
 
                                     <Label Content="Rows"/>
-                                    <TextBox Name="BoardRows" Grid.Column="1" PreviewTextInput="NumberValidationTextBox" DataObject.Pasting="TextBoxPasting"/>
+                                    <TextBox Name="BoardRowsField" Grid.Column="1" 
+                                             TextChanged="BoardRowsFieldChanged"
+                                             PreviewTextInput="NumberValidationTextBox" DataObject.Pasting="TextBoxPasting"/>
                                     <Label Grid.Column="2" Content="Columns"/>
-                                    <TextBox Name="BoardColumns" Grid.Column="3"/>
+                                    <TextBox Name="BoardColumnsField" Grid.Column="3" 
+                                             TextChanged="BoardColumnsFieldChanged"
+                                             PreviewTextInput="NumberValidationTextBox" DataObject.Pasting="TextBoxPasting"/>
                                 </Grid>
+                            </GroupBox>
+                            <GroupBox Grid.Row="1" Header="Free cell">
+                                <Button Name="FreeCellSpriteSelectionCommand" 
+                                    Click="FreeCellSpriteSelectionCommand_Click" 
+                                    Style="{StaticResource Flat}">
+                                    <UniformGrid Columns="1">
+                                        <Image Name="FreeCellSprite" />
+                                        <TextBlock Name="FreeCellSpriteText">Click to select a sprite region</TextBlock>
+                                    </UniformGrid>
+                                </Button>
                             </GroupBox>
                         </Grid>
                     </GroupBox>
+                    <Grid Grid.Column="0" Grid.ColumnSpan="2" Grid.Row="2" Margin="2">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        <UniformGrid Grid.Column="1" Rows="1" >
+                            <Button Name="SavePresetCommand" Click="SavePresetCommand_Click" Content="Save Preset" ToolTip="Save current preset"/>
+                            <Button Name="CancelPresetCommand" Click="CancelPresetCommand_Click" Content="Cancel" ToolTip="Reset to the last saved preset"/>
+                            <Button Name="ResetPresetCommand" Click="ResetPresetCommand_Click" Content="Clear" ToolTip="Full reset of preset"/>
+                        </UniformGrid>
+                    </Grid>
                 </Grid>
             </TabItem>
             <TabItem Name="GameProcessTab" Header="Game process">

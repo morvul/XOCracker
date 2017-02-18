@@ -1,6 +1,9 @@
-﻿using System.Text.RegularExpressions;
+﻿using System.Drawing;
+using System.Text.RegularExpressions;
 using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Input;
+using Image = System.Windows.Controls.Image;
 
 namespace XOCracker
 {
@@ -10,6 +13,7 @@ namespace XOCracker
     public partial class MainWindow
     {
         private GamePreset _gamePreset;
+
         public MainWindow()
         {
             InitializeComponent();
@@ -24,21 +28,33 @@ namespace XOCracker
 
         private void UpdatePresetControls()
         {
-            StartSprite.Source = ScreenshotRegion.BitmapToImageSource(_gamePreset.StartSprite);
-            if (_gamePreset.StartSprite != null)
-            {
-                StartSprite.MaxHeight = _gamePreset.StartSprite.Height;
-                StartSprite.MaxWidth = _gamePreset.StartSprite.Width;
-            }
+            SavePresetCommand.IsEnabled = _gamePreset.HasChanges;
+            CancelPresetCommand.IsEnabled = _gamePreset.HasChanges;
+            BoardRowsField.Text = _gamePreset.Rows.ToString();
+            BoardColumnsField.Text = _gamePreset.Columns.ToString();
+            UpdateSpiteControlls(StartSprite, StartSpriteText, _gamePreset.StartSprite);
+            UpdateSpiteControlls(TurnSprite, TurnSpriteText, _gamePreset.TurnSprite);
+            UpdateSpiteControlls(FreeCellSprite, FreeCellSpriteText, _gamePreset.FreeCellSprite);
 
-            StartSprite.Visibility = _gamePreset.StartSprite != null
-                ? Visibility.Visible : Visibility.Collapsed;
-            StartSpriteText.Visibility = _gamePreset.StartSprite != null
-                ? Visibility.Collapsed : Visibility.Visible;
             GameProcessTab.IsEnabled = _gamePreset.IsReady();
         }
 
-        private void Button_Click(object sender, RoutedEventArgs e)
+        private void UpdateSpiteControlls(Image spriteControl, TextBlock spriteTextControl, Bitmap bitmap)
+        {
+            spriteControl.Source = ScreenshotRegion.BitmapToImageSource(bitmap);
+            if (bitmap != null)
+            {
+                spriteControl.MaxHeight = bitmap.Height;
+                spriteControl.MaxWidth = bitmap.Width;
+            }
+
+            spriteControl.Visibility = bitmap != null
+                ? Visibility.Visible : Visibility.Collapsed;
+            spriteTextControl.Visibility = bitmap != null
+                ? Visibility.Collapsed : Visibility.Visible;
+        }
+
+        private void StartSpriteSelectionCommand_Click(object sender, RoutedEventArgs e)
         {
             ScreenshotRegion screener = new ScreenshotRegion();
             if (screener.ShowDialog() == true)
@@ -48,9 +64,31 @@ namespace XOCracker
             }
         }
 
+        private void TurnSpriteSelectionCommand_Click(object sender, RoutedEventArgs e)
+        {
+            ScreenshotRegion screener = new ScreenshotRegion();
+            if (screener.ShowDialog() == true)
+            {
+                _gamePreset.TurnSprite = screener.Picture;
+                UpdatePresetControls();
+            }
+        }
+
+
+        private void FreeCellSpriteSelectionCommand_Click(object sender, RoutedEventArgs e)
+        {
+            ScreenshotRegion screener = new ScreenshotRegion();
+            if (screener.ShowDialog() == true)
+            {
+                _gamePreset.FreeCellSprite = screener.Picture;
+                UpdatePresetControls();
+            }
+        }
+
         private void NumberValidationTextBox(object sender, TextCompositionEventArgs e)
         {
-            
+            Regex regex = new Regex("[^0-9]+");
+            e.Handled = regex.IsMatch(e.Text);
         }
 
         private void TextBoxPasting(object sender, DataObjectPastingEventArgs e)
@@ -68,6 +106,44 @@ namespace XOCracker
             {
                 e.CancelCommand();
             }
+        }
+
+        private void BoardRowsFieldChanged(object sender, TextChangedEventArgs e)
+        {
+            int rows;
+            if (int.TryParse(BoardRowsField.Text, out rows))
+            {
+                _gamePreset.Rows = rows;
+                UpdatePresetControls();
+            }
+        }
+
+        private void BoardColumnsFieldChanged(object sender, TextChangedEventArgs e)
+        {
+            int columns;
+            if (int.TryParse(BoardColumnsField.Text, out columns))
+            {
+                _gamePreset.Columns = columns;
+                UpdatePresetControls();
+            }
+        }
+
+        private void SavePresetCommand_Click(object sender, RoutedEventArgs e)
+        {
+            _gamePreset.Save();
+            UpdatePresetControls();
+        }
+
+        private void CancelPresetCommand_Click(object sender, RoutedEventArgs e)
+        {
+            _gamePreset.Reload();
+            UpdatePresetControls();
+        }
+
+        private void ResetPresetCommand_Click(object sender, RoutedEventArgs e)
+        {
+            _gamePreset.Reset();
+            UpdatePresetControls();
         }
     }
 }

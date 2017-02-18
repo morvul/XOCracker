@@ -9,7 +9,8 @@
         AllowsTransparency="True"
         Topmost="False"
         PreviewMouseDown="Window_MouseDown" 
-        PreviewMouseMove="Window_MouseMove">
+        PreviewMouseMove="Window_MouseMove"
+        >
     <Window.CommandBindings>
         <CommandBinding Command="{x:Static xoCracker:ScreenshotRegion.MyCommand}" Executed="AbortCommand"/>
     </Window.CommandBindings>
