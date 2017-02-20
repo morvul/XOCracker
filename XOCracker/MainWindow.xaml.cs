@@ -57,7 +57,7 @@ namespace XOCracker
 
         private void StartSpriteSelectionCommand_Click(object sender, RoutedEventArgs e)
         {
-            ScreenshotRegion screener = new ScreenshotRegion();
+            ScreenshotRegion screener = new ScreenshotRegion(this);
             if (screener.ShowDialog() == true)
             {
                 _gamePreset.StartSprite = screener.Picture;
@@ -67,7 +67,7 @@ namespace XOCracker
 
         private void TurnSpriteSelectionCommand_Click(object sender, RoutedEventArgs e)
         {
-            ScreenshotRegion screener = new ScreenshotRegion();
+            ScreenshotRegion screener = new ScreenshotRegion(this);
             if (screener.ShowDialog() == true)
             {
                 _gamePreset.TurnSprite = screener.Picture;
@@ -77,7 +77,7 @@ namespace XOCracker
 
         private void OCellSpriteSelectionCommand_Click(object sender, RoutedEventArgs e)
         {
-            ScreenshotRegion screener = new ScreenshotRegion();
+            ScreenshotRegion screener = new ScreenshotRegion(this);
             if (screener.ShowDialog() == true)
             {
                 _gamePreset.OCellSprite = screener.Picture;
@@ -87,7 +87,7 @@ namespace XOCracker
 
         private void XCellSpriteSelectionCommand_Click(object sender, RoutedEventArgs e)
         {
-            ScreenshotRegion screener = new ScreenshotRegion();
+            ScreenshotRegion screener = new ScreenshotRegion(this);
             if (screener.ShowDialog() == true)
             {
                 _gamePreset.XCellSprite = screener.Picture;
@@ -97,7 +97,7 @@ namespace XOCracker
 
         private void FreeCellSpriteSelectionCommand_Click(object sender, RoutedEventArgs e)
         {
-            ScreenshotRegion screener = new ScreenshotRegion();
+            ScreenshotRegion screener = new ScreenshotRegion(this);
             if (screener.ShowDialog() == true)
             {
                 _gamePreset.FreeCellSprite = screener.Picture;

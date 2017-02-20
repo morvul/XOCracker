@@ -1,14 +1,17 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.ComponentModel;
 using System.Runtime.InteropServices;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Drawing;
 using System.IO;
+using System.Linq;
 using System.Windows;
 using System.Windows.Forms;
 using System.Windows.Media.Imaging;
-using System.Windows.Threading;
 using MouseEventArgs = System.Windows.Input.MouseEventArgs;
+using Point = System.Drawing.Point;
 using Size = System.Drawing.Size;
 
 namespace XOCracker
@@ -19,7 +22,9 @@ namespace XOCracker
     public partial class ScreenshotRegion
     {
         public static readonly RoutedCommand MyCommand = new RoutedCommand();
+        private readonly Window _parentWindow;
         private readonly RectangleGeometry _region;
+        private readonly WindowState _prewParentState;
         private const int MinImgSize = 6;
         private const int MagicShift = 7;
         private double _startX;
@@ -31,7 +36,7 @@ namespace XOCracker
         private double _width;
         private double _height;
 
-        public ScreenshotRegion()
+        public ScreenshotRegion(Window parentWindow)
         {
             InitializeComponent();
             MyCommand.InputGestures.Add(new KeyGesture(Key.Escape));
@@ -44,6 +49,15 @@ namespace XOCracker
                 GeometryCombineMode = GeometryCombineMode.Exclude,
             };
             Cnv.Data = regiondata;
+            _parentWindow = parentWindow;
+            _prewParentState = _parentWindow.WindowState;
+            _parentWindow.WindowState = WindowState.Minimized;
+        }
+
+        protected override void OnClosing(CancelEventArgs e)
+        {
+            base.OnClosing(e);
+            _parentWindow.WindowState = _prewParentState;
         }
 
         private void AbortCommand(object sender, ExecutedRoutedEventArgs executedRoutedEventArgs)
@@ -93,11 +107,49 @@ namespace XOCracker
 
         private Bitmap PixelTraceCapture(int curX, int curY)
         {
-            Cnv.Visibility = Visibility.Collapsed;
-            Cnv.Dispatcher.Invoke(DispatcherPriority.Render, new Action(() =>{}));
+            WindowState = WindowState.Minimized;
             var screen = Screen.FromHandle(new System.Windows.Interop.WindowInteropHelper(this).Handle);
             var screenshot = CaptureScreen(0, 0, screen.Bounds.Width, screen.Bounds.Height);
+            var analyzedArea = new bool[screenshot.Width, screenshot.Height];
+            var topX = curX;
+            var topY = curY;
+            var downX = curX;
+            var downY = curY;
+            var x = curX;
+            var y = curY;
             var piColor = screenshot.GetPixel(curX, curY);
+            var pixelQueue = new Queue<Point>();
+            do
+            {
+                analyzedArea[x, y] = true;
+                if (topX > x) { topX = x; }
+                if (topY > y) { topY = y; }
+                if (downX < x) { downX = x; }
+                if (downY < y) { downY = y; }
+                if (screenshot.GetPixel(x, y) != piColor)
+                {
+                    var curPoint = pixelQueue.Dequeue();
+                    x = curPoint.X;
+                    y = curPoint.Y;
+                    continue;
+                }
+
+                if (x - 1 >= 0 && !analyzedArea[x - 1, y])
+                { pixelQueue.Enqueue(new Point(x - 1, y)); }
+                if (x + 1 < screen.Bounds.Width && !analyzedArea[x + 1, y])
+                { pixelQueue.Enqueue(new Point(x + 1, y)); }
+                if (y - 1 >= 0 && !analyzedArea[x, y - 1])
+                { pixelQueue.Enqueue(new Point(x, y - 1)); }
+                if (y + 1 < screen.Bounds.Height && !analyzedArea[x, y + 1])
+                { pixelQueue.Enqueue(new Point(x, y + 1)); }
+                if (pixelQueue.Any())
+                {
+                    var curPoint = pixelQueue.Dequeue();
+                    x = curPoint.X;
+                    y = curPoint.Y;
+                }
+            } while (pixelQueue.Count > 0);
+            /*
             var x1 = curX;
             var y1 = curY;
             while (--x1 > 0 && screenshot.GetPixel(x1, curY) == piColor);
@@ -106,9 +158,10 @@ namespace XOCracker
             var y2 = curY;
             while (++x2 < screen.Bounds.Width && screenshot.GetPixel(x2, curY) == piColor);
             while (++y2 < screen.Bounds.Height && screenshot.GetPixel(curX, y2) == piColor);
-            var width = --x2 - ++x1;
-            var height = --y2 - ++y1;
-            return CaptureScreen(x1, y1, width, height);
+            */
+            var width = downX - topX;
+            var height = downY - topY;
+            return CaptureScreen(topX, topY, width, height);
         }
 
         private double GetMin(double a, double b)
@@ -199,8 +252,11 @@ namespace XOCracker
 
                 _curX = _curY = _startX = _startY = 0;
                 _isMouseDown = false;
-                DialogResult = Picture != null;
-                Close();
+                if (!DialogResult.HasValue)
+                {
+                    DialogResult = Picture != null;
+                    Close();
+                }
             }
         }
     }
