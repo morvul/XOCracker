@@ -36,7 +36,9 @@ namespace XOCracker
             UpdateSpiteControlls(TurnSprite, TurnSpriteText, _gamePreset.TurnSprite);
             UpdateSpiteControlls(FreeCellSprite, FreeCellSpriteText, _gamePreset.FreeCellSprite);
             UpdateSpiteControlls(OCellSprite, OCellSpriteText, _gamePreset.OCellSprite);
+            UpdateSpiteControlls(OCellSprite2, OCellSprite2Text, _gamePreset.OCellSprite2);
             UpdateSpiteControlls(XCellSprite, XCellSpriteText, _gamePreset.XCellSprite);
+            UpdateSpiteControlls(XCellSprite2, XCellSprite2Text, _gamePreset.XCellSprite2);
             GameProcessTab.IsEnabled = _gamePreset.IsReady();
         }
 
@@ -85,12 +87,33 @@ namespace XOCracker
             }
         }
 
+
+        private void OCellSprite2SelectionCommand_Click(object sender, RoutedEventArgs e)
+        {
+            ScreenshotRegion screener = new ScreenshotRegion(this);
+            if (screener.ShowDialog() == true)
+            {
+                _gamePreset.OCellSprite2 = screener.Picture;
+                UpdatePresetControls();
+            }
+        }
+
         private void XCellSpriteSelectionCommand_Click(object sender, RoutedEventArgs e)
         {
             ScreenshotRegion screener = new ScreenshotRegion(this);
             if (screener.ShowDialog() == true)
             {
                 _gamePreset.XCellSprite = screener.Picture;
+                UpdatePresetControls();
+            }
+        }
+
+        private void XCellSprite2SelectionCommand_Click(object sender, RoutedEventArgs e)
+        {
+            ScreenshotRegion screener = new ScreenshotRegion(this);
+            if (screener.ShowDialog() == true)
+            {
+                _gamePreset.XCellSprite2 = screener.Picture;
                 UpdatePresetControls();
             }
         }

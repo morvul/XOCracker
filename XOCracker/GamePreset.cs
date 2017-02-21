@@ -17,6 +17,8 @@ namespace XOCracker
         private Bitmap _freeCellSprite;
         private Bitmap _oCellSprite;
         private Bitmap _xCellSprite;
+        private Bitmap _oCellSprite2;
+        private Bitmap _xCellSprite2;
 
         public bool HasChanges { get; set; }
 
@@ -73,6 +75,20 @@ namespace XOCracker
             }
         }
 
+        public Bitmap OCellSprite2
+        {
+            get { return _oCellSprite2; }
+            set
+            {
+                if (_oCellSprite2 != value)
+                {
+                    _oCellSprite2 = value;
+                    HasChanges = true;
+                }
+            }
+        }
+
+
         public Bitmap XCellSprite
         {
             get { return _xCellSprite; }
@@ -81,6 +97,19 @@ namespace XOCracker
                 if (_xCellSprite != value)
                 {
                     _xCellSprite = value;
+                    HasChanges = true;
+                }
+            }
+        }
+
+        public Bitmap XCellSprite2
+        {
+            get { return _xCellSprite2; }
+            set
+            {
+                if (_xCellSprite2 != value)
+                {
+                    _xCellSprite2 = value;
                     HasChanges = true;
                 }
             }
@@ -115,7 +144,9 @@ namespace XOCracker
 
         public bool IsReady()
         {
-            return StartSprite != null && TurnSprite != null && FreeCellSprite != null && OCellSprite != null && XCellSprite != null
+            return StartSprite != null && TurnSprite != null && FreeCellSprite != null
+                && (OCellSprite != null || OCellSprite2 != null) 
+                && (XCellSprite != null || XCellSprite2 != null) 
                 && Rows > 0 && Columns > 0;
         }
 
@@ -125,7 +156,9 @@ namespace XOCracker
             TurnSprite = null;
             FreeCellSprite = null;
             OCellSprite = null;
+            OCellSprite2 = null;
             XCellSprite = null;
+            XCellSprite2 = null;
             Rows = 0;
             Columns = 0;
         }
@@ -143,7 +176,9 @@ namespace XOCracker
                     TurnSprite = FromFile(nameof(TurnSprite));
                     FreeCellSprite = FromFile(nameof(FreeCellSprite));
                     OCellSprite = FromFile(nameof(OCellSprite));
+                    OCellSprite2 = FromFile(nameof(OCellSprite2));
                     XCellSprite = FromFile(nameof(XCellSprite));
+                    XCellSprite2 = FromFile(nameof(XCellSprite2));
                 }
             }
             catch (Exception excpt)
@@ -187,8 +222,12 @@ namespace XOCracker
                 FreeCellSprite?.Save(freeCellSpriteFileName);
                 var oCellSpriteFileName = Path.Combine(presetDir, nameof(OCellSprite) + ".bmp");
                 OCellSprite?.Save(oCellSpriteFileName);
+                var oCellSprite2FileName = Path.Combine(presetDir, nameof(OCellSprite2) + ".bmp");
+                OCellSprite2?.Save(oCellSprite2FileName);
                 var xCellSpriteFileName = Path.Combine(presetDir, nameof(XCellSprite) + ".bmp");
                 XCellSprite?.Save(xCellSpriteFileName);
+                var xCellSprite2FileName = Path.Combine(presetDir, nameof(XCellSprite2) + ".bmp");
+                XCellSprite2?.Save(xCellSprite2FileName);
             }
 
             HasChanges = false;

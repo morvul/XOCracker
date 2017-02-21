@@ -162,8 +162,8 @@ namespace XOCracker
                     y = curPoint.Y;
                 }
             } while (pixelQueue.Count > 0);
-            var width = downX - topX;
-            var height = downY - topY;
+            var width = downX - topX + 1;
+            var height = downY - topY + 1;
             return CaptureScreen(topX, topY, width, height);
         }
 

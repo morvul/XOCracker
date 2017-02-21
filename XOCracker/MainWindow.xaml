@@ -62,7 +62,7 @@
                             </UniformGrid>
                         </Button>
                     </GroupBox>
-                    <GroupBox Grid.Column="1" Grid.Row="0" Header="Board">
+                    <GroupBox Grid.Column="1" Grid.Row="0" Grid.RowSpan="2" Header="Board">
                         <Grid>
                             <Grid.RowDefinitions>
                                 <RowDefinition Height="Auto"/>
@@ -106,28 +106,52 @@
                                 </Button>
                             </GroupBox>
                             <GroupBox Grid.Column="1" Grid.Row="1" Header="O cell">
-                                <Button Name="OCellSpriteSelectionCommand" 
+                                <UniformGrid Columns="1">
+                                    <Button Name="OCellSpriteSelectionCommand" 
                                     Click="OCellSpriteSelectionCommand_Click" 
                                     Style="{StaticResource Flat}">
-                                    <UniformGrid Columns="1">
-                                        <Image Name="OCellSprite" />
-                                        <TextBlock Name="OCellSpriteText" ToolTip="Click to select a sprite region">
+                                        <UniformGrid Columns="1">
+                                            <Image Name="OCellSprite" />
+                                            <TextBlock Name="OCellSpriteText" ToolTip="Click to select a sprite region">
                                             Click to select a sprite region
-                                        </TextBlock>
-                                    </UniformGrid>
-                                </Button>
+                                            </TextBlock>
+                                        </UniformGrid>
+                                    </Button>
+                                    <Button Name="OCellSprite2SelectionCommand" 
+                                    Click="OCellSprite2SelectionCommand_Click" 
+                                    Style="{StaticResource Flat}">
+                                        <UniformGrid Columns="1">
+                                            <Image Name="OCellSprite2" />
+                                            <TextBlock Name="OCellSprite2Text" ToolTip="Click to select a sprite region">
+                                            Click to select a sprite region
+                                            </TextBlock>
+                                        </UniformGrid>
+                                    </Button>
+                                </UniformGrid>
                             </GroupBox>
                             <GroupBox Grid.Column="2" Grid.Row="1" Header="X cell">
-                                <Button Name="XCellSpriteSelectionCommand" 
+                                <UniformGrid Columns="1">
+                                    <Button Name="XCellSpriteSelectionCommand" 
                                     Click="XCellSpriteSelectionCommand_Click" 
                                     Style="{StaticResource Flat}">
-                                    <UniformGrid Columns="1">
-                                        <Image Name="XCellSprite" />
-                                        <TextBlock Name="XCellSpriteText" ToolTip="Click to select a sprite region">
+                                        <UniformGrid Columns="1">
+                                            <Image Name="XCellSprite" />
+                                            <TextBlock Name="XCellSpriteText" ToolTip="Click to select a sprite region">
                                             Click to select a sprite region
-                                        </TextBlock>
-                                    </UniformGrid>
-                                </Button>
+                                            </TextBlock>
+                                        </UniformGrid>
+                                    </Button>
+                                    <Button Name="XCellSprite2SelectionCommand" 
+                                    Click="XCellSprite2SelectionCommand_Click" 
+                                    Style="{StaticResource Flat}">
+                                        <UniformGrid Columns="1">
+                                            <Image Name="XCellSprite2" />
+                                            <TextBlock Name="XCellSprite2Text" ToolTip="Click to select a sprite region">
+                                            Click to select a sprite region
+                                            </TextBlock>
+                                        </UniformGrid>
+                                    </Button>
+                                </UniformGrid>
                             </GroupBox>
                         </Grid>
                     </GroupBox>
