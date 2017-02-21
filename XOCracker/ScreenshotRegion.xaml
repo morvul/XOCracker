@@ -10,6 +10,7 @@
         Topmost="True"
         PreviewMouseDown="Window_MouseDown" 
         PreviewMouseMove="Window_MouseMove"
+        WindowStartupLocation="CenterOwner"
         >
     <Window.CommandBindings>
         <CommandBinding Command="{x:Static xoCracker:ScreenshotRegion.MyCommand}" Executed="AbortCommand"/>

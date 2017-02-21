@@ -52,12 +52,15 @@ namespace XOCracker
             _parentWindow = parentWindow;
             _prewParentState = _parentWindow.WindowState;
             _parentWindow.WindowState = WindowState.Minimized;
+            Owner = _parentWindow;
         }
 
         protected override void OnClosing(CancelEventArgs e)
         {
             base.OnClosing(e);
             _parentWindow.WindowState = _prewParentState;
+            _parentWindow.Topmost = true;
+            _parentWindow.Topmost = false;
         }
 
         private void AbortCommand(object sender, ExecutedRoutedEventArgs executedRoutedEventArgs)
@@ -107,7 +110,6 @@ namespace XOCracker
 
         private Bitmap PixelTraceCapture(int curX, int curY)
         {
-            WindowState = WindowState.Minimized;
             var screen = Screen.FromHandle(new System.Windows.Interop.WindowInteropHelper(this).Handle);
             var screenshot = CaptureScreen(0, 0, screen.Bounds.Width, screen.Bounds.Height);
             var analyzedArea = new bool[screenshot.Width, screenshot.Height];
@@ -121,7 +123,6 @@ namespace XOCracker
             var pixelQueue = new Queue<Point>();
             do
             {
-                analyzedArea[x, y] = true;
                 if (topX > x) { topX = x; }
                 if (topY > y) { topY = y; }
                 if (downX < x) { downX = x; }
@@ -135,13 +136,25 @@ namespace XOCracker
                 }
 
                 if (x - 1 >= 0 && !analyzedArea[x - 1, y])
-                { pixelQueue.Enqueue(new Point(x - 1, y)); }
+                {
+                    pixelQueue.Enqueue(new Point(x - 1, y));
+                    analyzedArea[x - 1, y] = true;
+                }
                 if (x + 1 < screen.Bounds.Width && !analyzedArea[x + 1, y])
-                { pixelQueue.Enqueue(new Point(x + 1, y)); }
+                {
+                    pixelQueue.Enqueue(new Point(x + 1, y));
+                    analyzedArea[x + 1, y] = true;
+                }
                 if (y - 1 >= 0 && !analyzedArea[x, y - 1])
-                { pixelQueue.Enqueue(new Point(x, y - 1)); }
+                {
+                    pixelQueue.Enqueue(new Point(x, y - 1));
+                    analyzedArea[x, y - 1] = true;
+                }
                 if (y + 1 < screen.Bounds.Height && !analyzedArea[x, y + 1])
-                { pixelQueue.Enqueue(new Point(x, y + 1)); }
+                {
+                    pixelQueue.Enqueue(new Point(x, y + 1));
+                    analyzedArea[x, y + 1] = true;
+                }
                 if (pixelQueue.Any())
                 {
                     var curPoint = pixelQueue.Dequeue();
@@ -149,16 +162,6 @@ namespace XOCracker
                     y = curPoint.Y;
                 }
             } while (pixelQueue.Count > 0);
-            /*
-            var x1 = curX;
-            var y1 = curY;
-            while (--x1 > 0 && screenshot.GetPixel(x1, curY) == piColor);
-            while (--y1 > 0 && screenshot.GetPixel(curX, y1) == piColor);
-            var x2 = curX;
-            var y2 = curY;
-            while (++x2 < screen.Bounds.Width && screenshot.GetPixel(x2, curY) == piColor);
-            while (++y2 < screen.Bounds.Height && screenshot.GetPixel(curX, y2) == piColor);
-            */
             var width = downX - topX;
             var height = downY - topY;
             return CaptureScreen(topX, topY, width, height);
@@ -176,8 +179,9 @@ namespace XOCracker
                 return null;
             }
 
-            var ix = Convert.ToInt32(x) - MagicShift;
-            var iy = Convert.ToInt32(y) - MagicShift;
+            var screen = Screen.FromHandle(new System.Windows.Interop.WindowInteropHelper(this).Handle);
+            var ix = screen.Bounds.X + Convert.ToInt32(x) - MagicShift;
+            var iy = screen.Bounds.Y + Convert.ToInt32(y) - MagicShift;
             var iw = Convert.ToInt32(width);
             var ih = Convert.ToInt32(height);
 
@@ -237,6 +241,7 @@ namespace XOCracker
         {
             if (mouseState == MouseButtonState.Released && _isMouseDown)
             {
+                WindowState = WindowState.Minimized;
                 if (_width >= MinImgSize || _height >= MinImgSize)
                 {
                     var picture = CaptureScreen(GetMin(_startX, _curX), GetMin(_startY, _curY), _width, _height);
