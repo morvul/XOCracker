@@ -1,5 +1,4 @@
-﻿using System;
-using System.Diagnostics;
+﻿using System.Diagnostics;
 using System.Drawing;
 using System.IO;
 using System.Text.RegularExpressions;
@@ -30,16 +29,73 @@ namespace XOCracker
         private void InitializeGameProcessTab()
         {
             _gameProcess = GameProcess.Initialize(_gamePreset);
-            UpdateGameProcessControls();
+            _gameProcess.OnGameStateUpdated += OnGameStateUpdated;
+            if (!GameProcessTab.IsSelected)
+            {
+                TabControl.SelectedIndex = 1;
+            }
         }
 
-        private void UpdateGameProcessControls()
+        private void OnGameStateUpdated()
         {
-            throw new NotImplementedException();
+           UpdateBoard();
+        }
+
+        private void UpdateBoard()
+        {
+            var needRebuild = Board.Columns != _gamePreset.Columns || Board.Rows != _gamePreset.Rows;
+            if (needRebuild)
+            {
+                Board.Children.Clear();
+                Board.Columns = _gamePreset.Columns;
+                Board.Rows = _gamePreset.Rows;
+                for (int rowId = 0; rowId < _gamePreset.Rows; rowId++)
+                {
+                    for (int column = 0; column < _gamePreset.Columns; column++)
+                    {
+                        var cell = new Image
+                        {
+                            Source = ScreenshotRegion.BitmapToImageSource(_gamePreset.FreeCellSprite)
+                        };
+                        Board.Children.Add(cell);
+                    }
+                }
+            }
+            //Board.UpdateLayout();
+        }
+
+        private void UpdateGameProcessState()
+        {
+            if (!_gamePreset.IsReady())
+            {
+                TabControl.SelectedIndex = 0;
+                _gameProcess.Stop();
+                return;
+            }
+
+            UpdateBoard();
+            if (GameProcessTab.IsSelected)
+            {
+                _gameProcess.Update();
+            }
+            else
+            {
+                _gameProcess.Stop();
+            }
+        }
+
+        private void TabControl_OnSelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            UpdateGameProcessState();
+        }
+
+
+        private void StartCommand_OnClick(object sender, RoutedEventArgs e)
+        {
+            _gameProcess.Start();
         }
 
         #endregion
-
 
         #region Preset tab
 
@@ -250,7 +306,5 @@ namespace XOCracker
         }
 
         #endregion
-
-
     }
 }

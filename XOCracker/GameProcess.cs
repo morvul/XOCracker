@@ -1,4 +1,6 @@
-﻿namespace XOCracker
+﻿using System;
+
+namespace XOCracker
 {
     public class GameProcess
     {
@@ -9,18 +11,29 @@
         private GameProcess(GamePreset gamePreset)
         {
             _gamePreset = gamePreset;
+            Update();
         }
 
-        private void Reload()
+        public event Action OnGameStateUpdated;
+
+        public void Update()
         {
-            throw new System.NotImplementedException();
+            OnGameStateUpdated?.Invoke();
         }
 
         internal static GameProcess Initialize(GamePreset gamePreset)
         {
             var gameProcess = new GameProcess(gamePreset);
-            gameProcess.Reload();
             return gameProcess;
+        }
+
+        public void Stop()
+        {
+        }
+
+        public void Start()
+        {
+            Update();
         }
     }
 }

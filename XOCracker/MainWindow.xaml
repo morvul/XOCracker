@@ -32,8 +32,8 @@
         </Style>
     </Window.Resources>
     <Grid>
-        <TabControl>
-            <TabItem Header="Presets">
+        <TabControl Name="TabControl" SelectionChanged="TabControl_OnSelectionChanged">
+            <TabItem Name="PresetsTab" Header="Presets">
                 <Grid>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*"/>
@@ -182,6 +182,19 @@
                 </Grid>
             </TabItem>
             <TabItem Name="GameProcessTab" Header="Game process">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+
+                    <Border HorizontalAlignment="Center" VerticalAlignment="Center" BorderThickness="2" BorderBrush="Gainsboro">
+                        <UniformGrid Name="Board"/>
+                    </Border>
+                    <StackPanel Grid.Column="1" >
+                        <Button Name="StartCommand" Content="Start!" Click="StartCommand_OnClick"/>
+                    </StackPanel>
+                </Grid>
             </TabItem>
         </TabControl>
     </Grid>
