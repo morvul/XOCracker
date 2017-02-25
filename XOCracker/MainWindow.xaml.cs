@@ -1,10 +1,14 @@
-﻿using System.Diagnostics;
+﻿using System.ComponentModel;
+using System.Diagnostics;
 using System.Drawing;
 using System.IO;
+using System.Linq;
 using System.Text.RegularExpressions;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using XOCracker.Enums;
+using XOCracker.Properties;
 using Image = System.Windows.Controls.Image;
 
 namespace XOCracker
@@ -17,18 +21,45 @@ namespace XOCracker
         private GamePreset _gamePreset;
         private GameProcess _gameProcess;
 
+        #region Main window
+
         public MainWindow()
         {
             InitializeComponent();
+            InitializeWindow();
             InitializePresetTab();
             InitializeGameProcessTab();
         }
 
+        private void InitializeWindow()
+        {
+            Width = Settings.Default.WinWidth;
+            Height = Settings.Default.WinHeight;
+            Top = Settings.Default.WinTop;
+            Left = Settings.Default.WinLeft;
+        }
+
+        protected override void OnClosing(CancelEventArgs e)
+        {
+            _gameProcess.Save();
+            Settings.Default.WinWidth = Width;
+            Settings.Default.WinHeight = Height;
+            Settings.Default.WinTop = Top;
+            Settings.Default.WinLeft = Left;
+            Settings.Default.Save();
+            base.OnClosing(e);
+        }
+
+        #endregion
+        
         #region Game process tab
 
         private void InitializeGameProcessTab()
         {
-            _gameProcess = GameProcess.Initialize(_gamePreset);
+            _gameProcess = GameProcess.Initialize(_gamePreset, this);
+            DelayField.Text = _gameProcess.Delay.ToString();
+            AccuracyField.Text = _gameProcess.AnalysisAccuracy.ToString();
+            DispersionField.Text = _gameProcess.Dispersion.ToString();
             _gameProcess.OnGameStateUpdated += OnGameStateUpdated;
             if (!GameProcessTab.IsSelected)
             {
@@ -38,7 +69,7 @@ namespace XOCracker
 
         private void OnGameStateUpdated()
         {
-           UpdateBoard();
+            UpdateBoard();
         }
 
         private void UpdateBoard()
@@ -49,19 +80,35 @@ namespace XOCracker
                 Board.Children.Clear();
                 Board.Columns = _gamePreset.Columns;
                 Board.Rows = _gamePreset.Rows;
-                for (int rowId = 0; rowId < _gamePreset.Rows; rowId++)
+                for (var rowId = 0; rowId < _gamePreset.Rows; rowId++)
                 {
-                    for (int column = 0; column < _gamePreset.Columns; column++)
+                    for (var column = 0; column < _gamePreset.Columns; column++)
                     {
                         var cell = new Image
                         {
-                            Source = ScreenshotRegion.BitmapToImageSource(_gamePreset.FreeCellSprite)
+                            Source = SearchHelper.BitmapToImageSource(_gamePreset.FreeCellSprite)
                         };
                         Board.Children.Add(cell);
                     }
                 }
             }
-            //Board.UpdateLayout();
+        }
+
+        private void SetBoardCell(int row, int column, CellType cellType)
+        {
+            var cell = (Image)Board.Children[Board.Columns * row + column];
+            switch (cellType)
+            {
+                case CellType.Free:
+                    cell.Source = SearchHelper.BitmapToImageSource(_gamePreset.FreeCellSprite);
+                    break;
+                case CellType.OCell:
+                    cell.Source = SearchHelper.BitmapToImageSource(_gamePreset.OCellSprites.FirstOrDefault());
+                    break;
+                case CellType.XCell:
+                    cell.Source = SearchHelper.BitmapToImageSource(_gamePreset.XCellSprites.FirstOrDefault());
+                    break;
+            }
         }
 
         private void UpdateGameProcessState()
@@ -69,18 +116,18 @@ namespace XOCracker
             if (!_gamePreset.IsReady())
             {
                 TabControl.SelectedIndex = 0;
-                _gameProcess.Stop();
+                _gameProcess.StopMonitoring();
                 return;
             }
 
             UpdateBoard();
             if (GameProcessTab.IsSelected)
             {
-                _gameProcess.Update();
+                _gameProcess.RunMonitoring();
             }
             else
             {
-                _gameProcess.Stop();
+                _gameProcess.StopMonitoring();
             }
         }
 
@@ -92,12 +139,39 @@ namespace XOCracker
 
         private void StartCommand_OnClick(object sender, RoutedEventArgs e)
         {
+            StartCommand.Visibility = Visibility.Collapsed;
+            StopCommand.Visibility = Visibility.Visible;
             _gameProcess.Start();
+        }
+
+
+        private void StopCommand_OnClick(object sender, RoutedEventArgs e)
+        {
+            StopCommand.Visibility = Visibility.Collapsed;
+            StartCommand.Visibility = Visibility.Visible;
+            _gameProcess.Stop();
+        }
+
+        private void DelayChanged(object sender, TextChangedEventArgs e)
+        {
+            _gameProcess.Delay = int.Parse(DelayField.Text);
+        }
+
+
+        private void AccuracyChanged(object sender, TextChangedEventArgs e)
+        {
+            _gameProcess.AnalysisAccuracy = int.Parse(AccuracyField.Text);
+        }
+
+
+        private void DispersionChanged(object sender, TextChangedEventArgs e)
+        {
+            _gameProcess.Dispersion = int.Parse(DispersionField.Text);
         }
 
         #endregion
 
-        #region Preset tab
+            #region Preset tab
 
         private void InitializePresetTab()
         {
@@ -123,7 +197,7 @@ namespace XOCracker
 
         private void UpdateSpiteControlls(Image spriteControl, TextBlock spriteTextControl, Bitmap bitmap)
         {
-            spriteControl.Source = ScreenshotRegion.BitmapToImageSource(bitmap);
+            spriteControl.Source = SearchHelper.BitmapToImageSource(bitmap);
             if (bitmap != null)
             {
                 spriteControl.MaxHeight = bitmap.Height;
@@ -176,9 +250,9 @@ namespace XOCracker
 
         private void TextBoxPasting(object sender, DataObjectPastingEventArgs e)
         {
-            if (e.DataObject.GetDataPresent(typeof (string)))
+            if (e.DataObject.GetDataPresent(typeof(string)))
             {
-                string text = (string) e.DataObject.GetData(typeof (string));
+                string text = (string)e.DataObject.GetData(typeof(string));
                 Regex regex = new Regex("[^0-9]+");
                 if (text != null && regex.IsMatch(text))
                 {
@@ -231,7 +305,7 @@ namespace XOCracker
 
         private void OCellSpriteSelectionCommand_Click(object sender, RoutedEventArgs e)
         {
-            var image = (Bitmap) ((Button) sender).Tag;
+            var image = (Bitmap)((Button)sender).Tag;
             ScreenshotRegion screener = new ScreenshotRegion(this);
             if (screener.ShowDialog() == true)
             {
@@ -245,7 +319,7 @@ namespace XOCracker
 
         private void XCellSpriteSelectionCommand_Click(object sender, RoutedEventArgs e)
         {
-            var image = (Bitmap) ((Button) sender).Tag;
+            var image = (Bitmap)((Button)sender).Tag;
             ScreenshotRegion screener = new ScreenshotRegion(this);
             if (screener.ShowDialog() == true)
             {
@@ -281,7 +355,7 @@ namespace XOCracker
 
         private void RemoveOCell_Click(object sender, RoutedEventArgs e)
         {
-            var image = (Bitmap) ((MenuItem) sender).Tag;
+            var image = (Bitmap)((MenuItem)sender).Tag;
             _gamePreset.OCellSprites.Remove(image);
             _gamePreset.HasChanges = true;
             UpdatePresetControls();
@@ -289,7 +363,7 @@ namespace XOCracker
 
         private void RemoveXCell_Click(object sender, RoutedEventArgs e)
         {
-            var image = (Bitmap) ((MenuItem) sender).Tag;
+            var image = (Bitmap)((MenuItem)sender).Tag;
             _gamePreset.XCellSprites.Remove(image);
             _gamePreset.HasChanges = true;
             UpdatePresetControls();
@@ -306,5 +380,6 @@ namespace XOCracker
         }
 
         #endregion
+
     }
 }

@@ -8,5 +8,26 @@
     <Setting Name="Columns" Type="System.Int32" Scope="User">
       <Value Profile="(Default)">0</Value>
     </Setting>
+    <Setting Name="WinWidth" Type="System.Double" Scope="User">
+      <Value Profile="(Default)">440</Value>
+    </Setting>
+    <Setting Name="WinHeight" Type="System.Double" Scope="User">
+      <Value Profile="(Default)">330</Value>
+    </Setting>
+    <Setting Name="WinTop" Type="System.Double" Scope="User">
+      <Value Profile="(Default)">30</Value>
+    </Setting>
+    <Setting Name="WinLeft" Type="System.Double" Scope="User">
+      <Value Profile="(Default)">30</Value>
+    </Setting>
+    <Setting Name="Delay" Type="System.Int32" Scope="User">
+      <Value Profile="(Default)">300</Value>
+    </Setting>
+    <Setting Name="Accuracy" Type="System.Int32" Scope="User">
+      <Value Profile="(Default)">5</Value>
+    </Setting>
+    <Setting Name="Dispersion" Type="System.Int32" Scope="User">
+      <Value Profile="(Default)">1</Value>
+    </Setting>
   </Settings>
 </SettingsFile>

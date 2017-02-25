@@ -58,8 +58,9 @@
       <SubType>Designer</SubType>
     </ApplicationDefinition>
     <Compile Include="Converters\ImageConverter.cs" />
+    <Compile Include="Enums\CellType.cs" />
     <Compile Include="GamePreset.cs" />
-    <Compile Include="ImageContainer.cs" />
+    <Compile Include="SearchHelper.cs" />
     <Compile Include="GameProcess.cs" />
     <Compile Include="ScreenshotRegion.xaml.cs">
       <DependentUpon>ScreenshotRegion.xaml</DependentUpon>

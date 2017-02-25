@@ -1,7 +1,10 @@
 ﻿using System;
 using System.Drawing;
 using System.Drawing.Imaging;
+using System.IO;
 using System.Runtime.InteropServices;
+using System.Windows.Forms;
+using System.Windows.Media.Imaging;
 using System.Windows.Threading;
 
 namespace XOCracker
@@ -12,7 +15,7 @@ namespace XOCracker
         private readonly int _bmph;
         private readonly int _bmpw;
 
-        public ImageContainer(ref Bitmap img)
+        public ImageContainer(Bitmap img)
         {
             _bmph = img.Height;
             _bmpw = img.Width;
@@ -133,10 +136,54 @@ namespace XOCracker
         }
     }
 
-    public static class SearchHelper { 
+    public static class SearchHelper {
+        public const int MagicShift = 7;
+
         public static int ColorsCmp(Color c1, Color c2)  // метод определения разности между двумя цветами (для построения игрового поля)
         {
             return Math.Abs(c1.B - c2.B);
+        }
+
+        public static Bitmap CaptureScreen(double x, double y, double width, double height, IntPtr winHndl)
+        {
+            if (width <= 0 || height <= 0)
+            {
+                return null;
+            }
+
+            var screen = Screen.FromHandle(winHndl);
+            var ix = screen.Bounds.X + Convert.ToInt32(x) - MagicShift;
+            var iy = screen.Bounds.Y + Convert.ToInt32(y) - MagicShift;
+            var iw = Convert.ToInt32(width);
+            var ih = Convert.ToInt32(height);
+
+            Bitmap image = new Bitmap(iw, ih, PixelFormat.Format32bppArgb);
+            using (var gr = Graphics.FromImage(image))
+            {
+                gr.CopyFromScreen(ix, iy, 0, 0, new Size(iw, ih));
+            }
+
+            return image;
+        }
+
+        public static BitmapImage BitmapToImageSource(Bitmap bitmap)
+        {
+            if (bitmap == null)
+            {
+                return null;
+            }
+
+            using (MemoryStream memory = new MemoryStream())
+            {
+                bitmap.Save(memory, ImageFormat.Bmp);
+                memory.Position = 0;
+                BitmapImage bitmapimage = new BitmapImage();
+                bitmapimage.BeginInit();
+                bitmapimage.StreamSource = memory;
+                bitmapimage.CacheOption = BitmapCacheOption.OnLoad;
+                bitmapimage.EndInit();
+                return bitmapimage;
+            }
         }
 
         public static Bitmap ToGray(Bitmap img)      // метод построения матрицы сумм заданного изображения

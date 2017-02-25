@@ -46,5 +46,89 @@ namespace XOCracker.Properties {
                 this["Columns"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("440")]
+        public double WinWidth {
+            get {
+                return ((double)(this["WinWidth"]));
+            }
+            set {
+                this["WinWidth"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("330")]
+        public double WinHeight {
+            get {
+                return ((double)(this["WinHeight"]));
+            }
+            set {
+                this["WinHeight"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("30")]
+        public double WinTop {
+            get {
+                return ((double)(this["WinTop"]));
+            }
+            set {
+                this["WinTop"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("30")]
+        public double WinLeft {
+            get {
+                return ((double)(this["WinLeft"]));
+            }
+            set {
+                this["WinLeft"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("300")]
+        public int Delay {
+            get {
+                return ((int)(this["Delay"]));
+            }
+            set {
+                this["Delay"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("5")]
+        public int Accuracy {
+            get {
+                return ((int)(this["Accuracy"]));
+            }
+            set {
+                this["Accuracy"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("1")]
+        public int Dispersion {
+            get {
+                return ((int)(this["Dispersion"]));
+            }
+            set {
+                this["Dispersion"] = value;
+            }
+        }
     }
 }

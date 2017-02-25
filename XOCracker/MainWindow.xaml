@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:converters="clr-namespace:XOCracker.Converters"
         mc:Ignorable="d"
-        Title="XOCracker" Height="350" Width="525">
+        Title="XOCracker" Height="330" Width="440">
     <Window.Resources>
         <converters:ImageConverter x:Key="ImageConverter"/>
         <Image x:Key="DirIcon" Source="Resources/kde_gnome_fs_directory_accept.png" MaxHeight="20"/>
@@ -186,14 +186,39 @@
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*"/>
                         <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="Auto"/>
                     </Grid.ColumnDefinitions>
 
                     <Border HorizontalAlignment="Center" VerticalAlignment="Center" BorderThickness="2" BorderBrush="Gainsboro">
                         <UniformGrid Name="Board"/>
                     </Border>
-                    <StackPanel Grid.Column="1" >
+                    <Separator Grid.Column="1" Style="{StaticResource {x:Static ToolBar.SeparatorStyleKey}}"/>
+                    <Grid Grid.Column="2" MinWidth="100">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="*"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+                    <UniformGrid Columns="1">
                         <Button Name="StartCommand" Content="Start!" Click="StartCommand_OnClick"/>
-                    </StackPanel>
+                        <Button Name="StopCommand" Content="Stop" Click="StopCommand_OnClick" Visibility="Collapsed"/>
+                    </UniformGrid>
+                        <GroupBox Grid.Row="3" Header="Analysis accuracy">
+                            <TextBox Name="AccuracyField" TextChanged="AccuracyChanged"
+                                     PreviewTextInput="NumberValidationTextBox" DataObject.Pasting="TextBoxPasting"/>
+                        </GroupBox>
+                        <GroupBox Grid.Row="4" Header="Sprites Dispersion">
+                            <TextBox Name="DispersionField" TextChanged="DispersionChanged"
+                                     PreviewTextInput="NumberValidationTextBox" DataObject.Pasting="TextBoxPasting"/>
+                        </GroupBox>
+                        <GroupBox Grid.Row="5" Header="Update delay">
+                            <TextBox Name="DelayField" TextChanged="DelayChanged"
+                                     PreviewTextInput="NumberValidationTextBox" DataObject.Pasting="TextBoxPasting"/>
+                        </GroupBox>
+                    </Grid>
                 </Grid>
             </TabItem>
         </TabControl>

@@ -1,20 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Drawing;
-using System.IO;
 using System.Linq;
 using System.Windows;
 using System.Windows.Forms;
 using System.Windows.Interop;
-using System.Windows.Media.Imaging;
 using MouseEventArgs = System.Windows.Input.MouseEventArgs;
 using Point = System.Drawing.Point;
-using Size = System.Drawing.Size;
 
 namespace XOCracker
 {
@@ -28,7 +24,6 @@ namespace XOCracker
         private readonly RectangleGeometry _region;
         private readonly WindowState _prewParentState;
         private const int MinImgSize = 6;
-        private const int MagicShift = 7;
         private double _startX;
         private double _startY;
         private double _curX;
@@ -37,14 +32,15 @@ namespace XOCracker
         public Bitmap Picture;
         private double _width;
         private double _height;
+        private IntPtr _winHandle;
 
         public ScreenshotRegion(Window parentWindow)
         {
             InitializeComponent();
             MyCommand.InputGestures.Add(new KeyGesture(Key.Escape));
-            var screen = Screen.FromHandle(new System.Windows.Interop.WindowInteropHelper(this).Handle);
+            var screen = Screen.FromHandle(new WindowInteropHelper(this).Handle);
             var background = new RectangleGeometry(
-                new Rect(MagicShift, MagicShift, screen.Bounds.Width, screen.Bounds.Height));
+                new Rect(SearchHelper.MagicShift, SearchHelper.MagicShift, screen.Bounds.Width, screen.Bounds.Height));
             _region = new RectangleGeometry(new Rect(0, 0, 0, 0));
             var regiondata = new CombinedGeometry(background, _region)
             {
@@ -60,7 +56,9 @@ namespace XOCracker
         protected override void OnActivated(EventArgs e)
         {
             base.OnActivated(e);
-            NativeMethods.BringFormToFront(new WindowInteropHelper((Window)this).Handle);
+            _winHandle = new WindowInteropHelper(this).Handle;
+            NativeMethods.BringFormToFront(_winHandle);
+
         }
 
         protected override void OnClosing(CancelEventArgs e)
@@ -118,8 +116,8 @@ namespace XOCracker
 
         private Bitmap PixelTraceCapture(int curX, int curY)
         {
-            var screen = Screen.FromHandle(new System.Windows.Interop.WindowInteropHelper(this).Handle);
-            var screenshot = CaptureScreen(0, 0, screen.Bounds.Width, screen.Bounds.Height);
+            var screen = Screen.FromHandle(new WindowInteropHelper(this).Handle);
+            var screenshot = SearchHelper.CaptureScreen(0, 0, screen.Bounds.Width, screen.Bounds.Height, _winHandle);
             var analyzedArea = new bool[screenshot.Width, screenshot.Height];
             var topX = curX;
             var topY = curY;
@@ -172,54 +170,12 @@ namespace XOCracker
             } while (pixelQueue.Count > 0);
             var width = downX - topX + 1;
             var height = downY - topY + 1;
-            return CaptureScreen(topX, topY, width, height);
+            return SearchHelper.CaptureScreen(topX, topY, width, height, _winHandle);
         }
 
         private double GetMin(double a, double b)
         {
             return a < b ? a : b;
-        }
-
-        private Bitmap CaptureScreen(double x, double y, double width, double height)
-        {
-            if (width <= 0 || height <= 0)
-            {
-                return null;
-            }
-
-            var screen = Screen.FromHandle(new System.Windows.Interop.WindowInteropHelper(this).Handle);
-            var ix = screen.Bounds.X + Convert.ToInt32(x) - MagicShift;
-            var iy = screen.Bounds.Y + Convert.ToInt32(y) - MagicShift;
-            var iw = Convert.ToInt32(width);
-            var ih = Convert.ToInt32(height);
-
-            Bitmap image = new Bitmap(iw, ih, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
-            using (var gr = Graphics.FromImage(image))
-            {
-                gr.CopyFromScreen(ix, iy, 0, 0, new Size(iw, ih));
-            }
-
-            return image;
-        }
-
-        public static BitmapImage BitmapToImageSource(Bitmap bitmap)
-        {
-            if (bitmap == null)
-            {
-                return null;
-            }
-
-            using (MemoryStream memory = new MemoryStream())
-            {
-                bitmap.Save(memory, System.Drawing.Imaging.ImageFormat.Bmp);
-                memory.Position = 0;
-                BitmapImage bitmapimage = new BitmapImage();
-                bitmapimage.BeginInit();
-                bitmapimage.StreamSource = memory;
-                bitmapimage.CacheOption = BitmapCacheOption.OnLoad;
-                bitmapimage.EndInit();
-                return bitmapimage;
-            }
         }
 
         internal static class NativeMethods
@@ -244,10 +200,10 @@ namespace XOCracker
             [return: MarshalAs(UnmanagedType.Bool)]
             public static extern bool SetForegroundWindow(IntPtr hWnd);
 
-            [System.Runtime.InteropServices.DllImport("User32.dll")]
+            [DllImport("User32.dll")]
             private static extern bool ShowWindow(IntPtr handle, int nCmdShow);
 
-            [System.Runtime.InteropServices.DllImport("User32.dll")]
+            [DllImport("User32.dll")]
             private static extern bool IsIconic(IntPtr handle);
 
             public static void BringFormToFront(IntPtr handle)
@@ -273,7 +229,7 @@ namespace XOCracker
                 WindowState = WindowState.Minimized;
                 if (_width >= MinImgSize || _height >= MinImgSize)
                 {
-                    var picture = CaptureScreen(GetMin(_startX, _curX), GetMin(_startY, _curY), _width, _height);
+                    var picture = SearchHelper.CaptureScreen(GetMin(_startX, _curX), GetMin(_startY, _curY), _width, _height, _winHandle);
                     if (picture != null)
                     {
                         Picture = picture;
