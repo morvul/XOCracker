@@ -57,7 +57,10 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="Converters\ImageConverter.cs" />
     <Compile Include="GamePreset.cs" />
+    <Compile Include="ImageContainer.cs" />
+    <Compile Include="GameProcess.cs" />
     <Compile Include="ScreenshotRegion.xaml.cs">
       <DependentUpon>ScreenshotRegion.xaml</DependentUpon>
     </Compile>
@@ -104,6 +107,12 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Models\" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resources\kde_gnome_fs_directory_accept.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.Windows.Input;
 using System.Windows.Media;
@@ -9,6 +10,7 @@ using System.IO;
 using System.Linq;
 using System.Windows;
 using System.Windows.Forms;
+using System.Windows.Interop;
 using System.Windows.Media.Imaging;
 using MouseEventArgs = System.Windows.Input.MouseEventArgs;
 using Point = System.Drawing.Point;
@@ -53,6 +55,12 @@ namespace XOCracker
             _prewParentState = _parentWindow.WindowState;
             _parentWindow.WindowState = WindowState.Minimized;
             Owner = _parentWindow;
+        }
+
+        protected override void OnActivated(EventArgs e)
+        {
+            base.OnActivated(e);
+            NativeMethods.BringFormToFront(new WindowInteropHelper((Window)this).Handle);
         }
 
         protected override void OnClosing(CancelEventArgs e)
@@ -216,6 +224,7 @@ namespace XOCracker
 
         internal static class NativeMethods
         {
+            const int SwRestore = 9;
 
             [DllImport("user32.dll")]
             public static extern IntPtr GetDesktopWindow();
@@ -230,6 +239,26 @@ namespace XOCracker
             public static extern IntPtr GetDC(IntPtr hwnd);
             [DllImport("User32.dll")]
             public static extern void ReleaseDC(IntPtr hwnd, IntPtr dc);
+
+            [DllImport("user32.dll")]
+            [return: MarshalAs(UnmanagedType.Bool)]
+            public static extern bool SetForegroundWindow(IntPtr hWnd);
+
+            [System.Runtime.InteropServices.DllImport("User32.dll")]
+            private static extern bool ShowWindow(IntPtr handle, int nCmdShow);
+
+            [System.Runtime.InteropServices.DllImport("User32.dll")]
+            private static extern bool IsIconic(IntPtr handle);
+
+            public static void BringFormToFront(IntPtr handle)
+            {
+                if (IsIconic(handle))
+                {
+                    ShowWindow(handle, SwRestore);
+                }
+
+                SetForegroundWindow(handle);
+            }
         }
 
         private void Canvas_MouseUp(object sender, MouseButtonEventArgs e)

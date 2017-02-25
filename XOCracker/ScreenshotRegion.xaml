@@ -17,6 +17,6 @@
     </Window.CommandBindings>
     <Grid>
         <Canvas Name="Canvas" />
-        <Path x:Name="Cnv" Fill="Black" Opacity="0.8" MouseUp="Canvas_MouseUp"/>
+        <Path x:Name="Cnv" Fill="Black" Opacity="0.5" MouseUp="Canvas_MouseUp"/>
     </Grid>
 </Window>

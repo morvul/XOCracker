@@ -3,9 +3,12 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:converters="clr-namespace:XOCracker.Converters"
         mc:Ignorable="d"
         Title="XOCracker" Height="350" Width="525">
     <Window.Resources>
+        <converters:ImageConverter x:Key="ImageConverter"/>
+        <Image x:Key="DirIcon" Source="Resources/kde_gnome_fs_directory_accept.png" MaxHeight="20"/>
         <Style x:Key="Flat" TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
             <Setter Property="Background" Value="#01000000" />
             <Setter Property="BorderBrush" Value="{x:Null}" />
@@ -105,82 +108,72 @@
                                     </UniformGrid>
                                 </Button>
                             </GroupBox>
-                            <GroupBox Grid.Column="1" Grid.Row="1" Header="O cell">
-                                <UniformGrid Columns="1">
-                                    <Button Name="OCellSpriteSelectionCommand" 
-                                            Click="OCellSpriteSelectionCommand_Click" 
-                                            Style="{StaticResource Flat}">
-                                        <UniformGrid Columns="1">
-                                            <Image Name="OCellSprite" />
-                                            <TextBlock Name="OCellSpriteText" ToolTip="Click to select a sprite region">
-                                             Click here
-                                            </TextBlock>
-                                        </UniformGrid>
-                                    </Button>
-                                    <Button Name="OCellSprite2SelectionCommand" 
-                                            Click="OCellSprite2SelectionCommand_Click" 
-                                            Style="{StaticResource Flat}">
-                                        <UniformGrid Columns="1">
-                                            <Image Name="OCellSprite2" />
-                                            <TextBlock Name="OCellSprite2Text" ToolTip="Click to select a sprite region">
-                                            Click here
-                                            </TextBlock>
-                                        </UniformGrid>
-                                    </Button>
-                                    <Button Name="OCellSprite3SelectionCommand" 
-                                            Click="OCellSprite3SelectionCommand_Click" 
-                                            Style="{StaticResource Flat}">
-                                        <UniformGrid Columns="1">
-                                            <Image Name="OCellSprite3" />
-                                            <TextBlock Name="OCellSprite3Text" ToolTip="Click to select a sprite region">
-                                             Click here
-                                            </TextBlock>
-                                        </UniformGrid>
-                                    </Button>
-                                </UniformGrid>
+                            <GroupBox Grid.Column="1" Grid.Row="1" Header="O cells">
+                                <Grid>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="*"/>
+                                        <RowDefinition Height="Auto"/>
+                                    </Grid.RowDefinitions>
+
+                                    <ListBox Name="OCellList" HorizontalContentAlignment="Stretch" ScrollViewer.HorizontalScrollBarVisibility="Disabled">
+                                        <ListBox.ItemTemplate>
+                                            <DataTemplate>
+                                                <Button Click="OCellSpriteSelectionCommand_Click" 
+                                                    Tag ="{Binding}" Style="{StaticResource Flat}">
+                                                    <Image Source="{Binding Converter={StaticResource ImageConverter}}"
+                                                           MaxWidth="{Binding RelativeSource={RelativeSource Self}, Path=Source.PixelWidth}"/>
+                                                    <Button.ContextMenu>
+                                                        <ContextMenu>
+                                                            <MenuItem Header="Remove" Click="RemoveOCell_Click" Tag="{Binding}"/>
+                                                        </ContextMenu>
+                                                    </Button.ContextMenu>
+                                                </Button>
+                                            </DataTemplate>
+                                        </ListBox.ItemTemplate>
+                                    </ListBox>
+                                    <Button Grid.Row="1" Click="AddNewOCellSprite_Click" Content="Add"/>
+                                </Grid>
                             </GroupBox>
-                            <GroupBox Grid.Column="2" Grid.Row="1" Header="X cell">
-                                <UniformGrid Columns="1">
-                                    <Button Name="XCellSpriteSelectionCommand" 
-                                            Click="XCellSpriteSelectionCommand_Click" 
-                                            Style="{StaticResource Flat}">
-                                        <UniformGrid Columns="1">
-                                            <Image Name="XCellSprite" />
-                                            <TextBlock Name="XCellSpriteText" ToolTip="Click to select a sprite region">
-                                            Click here
-                                            </TextBlock>
-                                        </UniformGrid>
-                                    </Button>
-                                    <Button Name="XCellSprite2SelectionCommand" 
-                                            Click="XCellSprite2SelectionCommand_Click" 
-                                            Style="{StaticResource Flat}">
-                                        <UniformGrid Columns="1">
-                                            <Image Name="XCellSprite2" />
-                                            <TextBlock Name="XCellSprite2Text" ToolTip="Click to select a sprite region">
-                                             Click here
-                                            </TextBlock>
-                                        </UniformGrid>
-                                    </Button>
-                                    <Button Name="XCellSprite3SelectionCommand" 
-                                            Click="XCellSprite3SelectionCommand_Click" 
-                                            Style="{StaticResource Flat}">
-                                        <UniformGrid Columns="1">
-                                            <Image Name="XCellSprite3" />
-                                            <TextBlock Name="XCellSprite3Text" ToolTip="Click to select a sprite region">
-                                             Click here
-                                            </TextBlock>
-                                        </UniformGrid>
-                                    </Button>
-                                </UniformGrid>
+                            <GroupBox Grid.Column="2" Grid.Row="1" Header="X cells">
+                                <Grid>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="*"/>
+                                        <RowDefinition Height="Auto"/>
+                                    </Grid.RowDefinitions>
+
+                                    <ListBox Name="XCellList" HorizontalContentAlignment="Stretch" ScrollViewer.HorizontalScrollBarVisibility="Disabled">
+                                        <ListBox.ItemTemplate>
+                                            <DataTemplate>
+                                                <Button Click="XCellSpriteSelectionCommand_Click" 
+                                                    Tag ="{Binding}" Style="{StaticResource Flat}">
+                                                    <Image Source="{Binding Converter={StaticResource ImageConverter}}"
+                                                           MaxWidth="{Binding RelativeSource={RelativeSource Self}, Path=Source.PixelWidth}"/>
+                                                    <Button.ContextMenu>
+                                                        <ContextMenu>
+                                                            <MenuItem Header="Remove" Click="RemoveXCell_Click" Tag="{Binding}"/>
+                                                        </ContextMenu>
+                                                    </Button.ContextMenu>
+                                                </Button>
+                                            </DataTemplate>
+                                        </ListBox.ItemTemplate>
+                                    </ListBox>
+                                    <Button Grid.Row="1" Click="AddNewXCellSprite_Click" Content="Add"/>
+                                </Grid>
                             </GroupBox>
                         </Grid>
                     </GroupBox>
                     <Grid Grid.Column="0" Grid.ColumnSpan="2" Grid.Row="2" Margin="2">
                         <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
                             <ColumnDefinition Width="*"/>
                             <ColumnDefinition Width="Auto"/>
                         </Grid.ColumnDefinitions>
-                        <UniformGrid Grid.Column="1" Rows="1" >
+                        <Button Name="OpenPresetDirCommand" 
+                                Content="{StaticResource DirIcon}"
+                                Click="OpenPresetDirCommand_Click" 
+                                ToolTip="Open folder with saved sprites"
+                                Style="{StaticResource Flat}"/>
+                        <UniformGrid Grid.Column="2" Rows="1" >
                             <Button Name="SavePresetCommand" Click="SavePresetCommand_Click" Content="Save Preset" ToolTip="Save current preset"/>
                             <Button Name="CancelPresetCommand" Click="CancelPresetCommand_Click" Content="Cancel" ToolTip="Reset to the last saved preset"/>
                             <Button Name="ResetPresetCommand" Click="ResetPresetCommand_Click" Content="Clear" ToolTip="Full reset of preset"/>
