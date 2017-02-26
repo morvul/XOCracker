@@ -53,6 +53,8 @@ namespace XOCracker
             Owner = _parentWindow;
         }
 
+        public Rectangle Rectangle { get; set; }
+
         protected override void OnActivated(EventArgs e)
         {
             base.OnActivated(e);
@@ -170,6 +172,7 @@ namespace XOCracker
             } while (pixelQueue.Count > 0);
             var width = downX - topX + 1;
             var height = downY - topY + 1;
+            Rectangle = new Rectangle(topX - SearchHelper.MagicShift, topY - SearchHelper.MagicShift, width, height);
             return SearchHelper.CaptureScreen(topX, topY, width, height, _winHandle);
         }
 
@@ -233,6 +236,7 @@ namespace XOCracker
                     if (picture != null)
                     {
                         Picture = picture;
+                        Rectangle = new Rectangle((int)GetMin(_startX, _curX), (int)GetMin(_startY, _curY), (int)_width, (int)_height);
                     }
                 }
                 else

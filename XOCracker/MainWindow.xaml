@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:converters="clr-namespace:XOCracker.Converters"
         mc:Ignorable="d"
-        Title="XOCracker" Height="330" Width="440">
+        Title="XOCracker" Height="330" Width="480">
     <Window.Resources>
         <converters:ImageConverter x:Key="ImageConverter"/>
         <Image x:Key="DirIcon" Source="Resources/kde_gnome_fs_directory_accept.png" MaxHeight="20"/>
@@ -85,14 +85,27 @@
                                         <ColumnDefinition/>
                                         <ColumnDefinition/>
                                     </Grid.ColumnDefinitions>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
+                                    </Grid.RowDefinitions>
 
                                     <Label Content="Rows"/>
-                                    <TextBox Name="BoardRowsField" Grid.Column="1" 
+                                    <TextBox Name="BoardRowsField" Grid.Column="1" Grid.Row="0"
                                              TextChanged="BoardRowsFieldChanged"
                                              PreviewTextInput="NumberValidationTextBox" DataObject.Pasting="TextBoxPasting"/>
-                                    <Label Grid.Column="2" Content="Columns"/>
-                                    <TextBox Name="BoardColumnsField" Grid.Column="3" 
+                                    <Label Grid.Column="2" Grid.Row="0" Content="Columns"/>
+                                    <TextBox Name="BoardColumnsField" Grid.Column="3" Grid.Row="0" 
                                              TextChanged="BoardColumnsFieldChanged"
+                                             PreviewTextInput="NumberValidationTextBox" DataObject.Pasting="TextBoxPasting"/>
+
+                                    <Label Content="First cell" Grid.Row="1" Grid.Column="0"/>
+                                    <TextBox Name="FirstCellField" Grid.Column="1" Grid.Row="1" IsReadOnly="True" Background="LightBlue"
+                                             PreviewMouseDown="FirstCellField_OnMouseLeftButtonUp"
+                                             PreviewTextInput="NumberValidationTextBox" DataObject.Pasting="TextBoxPasting"/>
+                                    <Label Grid.Column="2" Grid.Row="1" Content="Last cell"/>
+                                    <TextBox Name="LastCellField" Grid.Column="3" Grid.Row="1" IsReadOnly="True" Background="LightBlue"
+                                             PreviewMouseDown="LastCellField_OnMouseLeftButtonUp"
                                              PreviewTextInput="NumberValidationTextBox" DataObject.Pasting="TextBoxPasting"/>
                                 </Grid>
                             </GroupBox>

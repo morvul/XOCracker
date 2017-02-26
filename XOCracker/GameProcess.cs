@@ -23,11 +23,9 @@ namespace XOCracker
         private Rectangle _winParams;
         private Task _monitoringProcess;
         private bool _isMonitoringRinning;
-        private int _cellShift;
 
         private GameProcess()
         {
-            _cellShift = 3;
             _isMonitoringRinning = false;
             _monitoringProcess = new Task(Monitoring);
             UpdatedCells = new Queue<Cell>();
@@ -56,10 +54,10 @@ namespace XOCracker
         public CellType[,] Board { get; set; }
 
         private List<KeyValuePair<ImageContainer, CellType>> PossibleCells => _gamePreset.OCellSprites
-                    .Select(x => new KeyValuePair<ImageContainer, CellType>(new ImageContainer(x, _cellShift), CellType.OCell))
+                    .Select(x => new KeyValuePair<ImageContainer, CellType>(new ImageContainer(x), CellType.OCell))
                 .Union(_gamePreset.XCellSprites
-                    .Select(x => new KeyValuePair<ImageContainer, CellType>(new ImageContainer(x, _cellShift), CellType.XCell)))
-                .Union(new[] { new KeyValuePair<ImageContainer, CellType>(new ImageContainer(_gamePreset.FreeCellSprite, _cellShift), CellType.Free) })
+                    .Select(x => new KeyValuePair<ImageContainer, CellType>(new ImageContainer(x), CellType.XCell)))
+                .Union(new[] { new KeyValuePair<ImageContainer, CellType>(new ImageContainer(_gamePreset.FreeCellSprite), CellType.Free) })
                 .ToList();
 
         public Queue<Cell> UpdatedCells { get; set; }
@@ -113,7 +111,6 @@ namespace XOCracker
         {
             var isBoardUpdated = false;
             var screen = Screen.FromHandle(_winHandle);
-            Cell firstCell = new Cell(CellType.Unknown, 0, 0);
             while (_isMonitoringRinning)
             {
                 var screenShot = SearchHelper.CaptureScreen(SearchHelper.MagicShift, SearchHelper.MagicShift,
@@ -136,41 +133,41 @@ namespace XOCracker
                 #endregion
 
                 var searchScreenObj = new ImageContainer(screenShot);
-                if (firstCell.CellType != CellType.Unknown)
-                {
-                    firstCell = UpdateCellType(firstCell, searchScreenObj);
-                }
-
-                if (firstCell.CellType == CellType.Unknown)
-                {
-                    firstCell = GetFirstCell(searchScreenObj);
-                }
-
-                var boardCells = new List<Cell> { firstCell };
-                if (firstCell.CellType != CellType.Unknown)
-                {
-                    boardCells.AddRange(GetBoardCells(firstCell, searchScreenObj));
-                }
-
-                using (var graphics = Graphics.FromImage(screenShot))
-                {
-                    foreach (var boardCell in boardCells)
-                    {
-                        isBoardUpdated |= SetBoardCell(boardCell);
-                        graphics.FillRectangle(Brushes.Crimson, boardCell.X, boardCell.Y,
-                        boardCell.Width, boardCell.Height);
-                    }
-
-                    screenShot.Save("ss.bmp");
-                }
-
-                if (isBoardUpdated)
-                {
-                    isBoardUpdated = false;
-                    OnGameStateUpdated?.Invoke();
-                }
+                UpdateBoard(searchScreenObj);
 
                 Thread.Sleep(Delay);
+            }
+        }
+
+        private void UpdateBoard(ImageContainer screen)
+        {
+            bool isBoardUpdated = false;
+            var firstCellPos = _gamePreset.FirstCell;
+            var lastCellPos = _gamePreset.LastCell;
+            var horCellDistance = (lastCellPos.X - firstCellPos.X) / (_gamePreset.Columns - 2);
+            var verCellDistance = (lastCellPos.Y - firstCellPos.Y) / (_gamePreset.Rows - 2);
+            if (Board.GetLength(0) != _gamePreset.Rows || Board.GetLength(1) != _gamePreset.Columns)
+            {
+                Board = new CellType[_gamePreset.Rows, _gamePreset.Columns];
+            }
+
+            for (int row = 0; row < _gamePreset.Rows; row++)
+            {
+                for (int column = 0; column < _gamePreset.Columns; column++)
+                {
+                    var cellType = Board[row, column];
+                    var x = firstCellPos.X + horCellDistance * column;
+                    var y = firstCellPos.Y + verCellDistance * row;
+
+                    var cell = new Cell(cellType, row, column, x, y, _gamePreset.FirstCell.Height, _gamePreset.FirstCell.Width);
+                    cell = UpdateCellType(cell, screen);
+                    isBoardUpdated |= SetBoardCell(cell);
+                }
+            }
+
+            if (isBoardUpdated)
+            {
+                OnGameStateUpdated?.Invoke();
             }
         }
 
@@ -216,116 +213,6 @@ namespace XOCracker
             }
 
             return cell;
-        }
-
-        private Cell GetFirstCell(ImageContainer screen)
-        {
-            Rectangle firstCell = new Rectangle(screen.GetWidth(), screen.GetHeight(), 0, 0);
-            CellType firstCellType = CellType.Unknown;
-            foreach (var possibleCell in PossibleCells)
-            {
-                var cellPoint = screen.Find(possibleCell.Key, AnalysisAccuracy, Dispersion, _cellShift);
-                if (cellPoint == Point.Empty)
-                {
-                    continue;
-                }
-
-                if (firstCell.Y > cellPoint.Y || (firstCell.Y == cellPoint.Y && firstCell.X > cellPoint.X))
-                {
-                    firstCell.X = cellPoint.X;
-                    firstCell.Y = cellPoint.Y;
-                    firstCell.Width = possibleCell.Key.GetWidth();
-                    firstCell.Height = possibleCell.Key.GetHeight();
-                    firstCellType = possibleCell.Value;
-                }
-            }
-
-            return new Cell(firstCellType, 0, 0, firstCell);
-        }
-
-
-        private List<Cell> GetBoardCells(Cell firstCell, ImageContainer screen)
-        {
-            var result = new List<Cell>();
-            var prewCell = firstCell;
-            for (int row = 0; row < _gamePreset.Rows; row++)
-            {
-                for (int column = 0; column < _gamePreset.Columns; column++)
-                {
-                    if (column == 0 && row == 0)
-                    {
-                        continue;
-                    }
-
-                    Cell nextCell = new Cell();
-
-                    if (column > 0)
-                    {
-                        var cellCenterX = prewCell.X + prewCell.Width / 2 + _cellShift;
-                        var cellCenterY = prewCell.Y + prewCell.Height / 2;
-                        int? minDiff = null;
-
-                        for (int x = cellCenterX; x < cellCenterX + prewCell.Width + _cellShift; x++)
-                        {
-                            foreach (var possibleCell in PossibleCells)
-                            {
-                                var y = cellCenterY - possibleCell.Key.GetHeight() / 2;
-                                var image = possibleCell.Key;
-                                var diff = screen.Difference(ref image, x, y, x + possibleCell.Key.GetWidth(),
-                                    y + possibleCell.Key.GetHeight(),
-                                    new Size(possibleCell.Key.GetWidth(), possibleCell.Key.GetHeight()),
-                                    AnalysisAccuracy);
-                                if (minDiff == null || minDiff.Value >= diff)
-                                {
-                                    nextCell.X = x;
-                                    nextCell.Y = y;
-                                    nextCell.Width = possibleCell.Key.GetWidth();
-                                    nextCell.Height = possibleCell.Key.GetHeight();
-                                    nextCell.CellType = diff <= Dispersion ? possibleCell.Value : CellType.Unknown;
-                                    minDiff = diff;
-                                }
-                            }
-                        }
-                    }
-                    else
-                    {
-                        var cellCenterX = firstCell.X + firstCell.Width / 2;
-                        var cellCenterY = firstCell.Y + firstCell.Height / 2;
-                        int? minDiff = null;
-
-                        for (int y = cellCenterY; y < cellCenterY + firstCell.Height + _cellShift; y++)
-                        {
-                            foreach (var possibleCell in PossibleCells)
-                            {
-                                var x = cellCenterX - possibleCell.Key.GetWidth() / 2;
-                                var image = possibleCell.Key;
-                                var diff = screen.Difference(ref image, x, y, x + possibleCell.Key.GetWidth(),
-                                    y + possibleCell.Key.GetHeight(),
-                                    new Size(possibleCell.Key.GetWidth(), possibleCell.Key.GetHeight()),
-                                    AnalysisAccuracy);
-                                if (minDiff == null || minDiff.Value >= diff)
-                                {
-                                    nextCell.X = x;
-                                    nextCell.Y = y;
-                                    nextCell.Width = possibleCell.Key.GetWidth();
-                                    nextCell.Height = possibleCell.Key.GetHeight();
-                                    nextCell.CellType = diff <= Dispersion ? possibleCell.Value : CellType.Unknown;
-                                    minDiff = diff;
-                                }
-                            }
-                        }
-
-                        firstCell = nextCell;
-                    }
-
-                    nextCell.Row = row;
-                    nextCell.Column = column;
-                    prewCell = nextCell;
-                    result.Add(nextCell);
-                }
-            }
-
-            return result;
         }
 
         public void RunMonitoring()

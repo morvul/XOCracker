@@ -19,6 +19,8 @@ namespace XOCracker
         private Bitmap _freeCellSprite;
         private List<Bitmap> _oCellSprites;
         private List<Bitmap> _xCellSprites;
+        private Rectangle _firstCell;
+        private Rectangle _lastCell;
 
         private GamePreset()
         {
@@ -121,11 +123,37 @@ namespace XOCracker
 
         public string DirectoryPath => GamePresetDir;
 
+        public Rectangle FirstCell
+        {
+            get { return _firstCell; }
+            set
+            {
+                if (_firstCell != value)
+                {
+                    _firstCell = value;
+                    HasChanges = true;
+                }
+            }
+        }
+
+        public Rectangle LastCell
+        {
+            get { return _lastCell; }
+            set
+            {
+                if (_lastCell != value)
+                {
+                    _lastCell = value;
+                    HasChanges = true;
+                }
+            }
+        }
+
         public bool IsReady()
         {
             return StartSprite != null && TurnSprite != null && FreeCellSprite != null
                 && (OCellSprites.Count > 0) && (XCellSprites.Count > 0)
-                && Rows > 0 && Columns > 0;
+                && Rows > 0 && Columns > 0 && FirstCell != Rectangle.Empty && LastCell != Rectangle.Empty;
         }
 
         public void Reset()
@@ -151,6 +179,8 @@ namespace XOCracker
         public void Reload()
         {
             Rows = Settings.Default.Rows;
+            FirstCell = Settings.Default.FirstCell;
+            LastCell = Settings.Default.LastCell;
             Columns = Settings.Default.Columns;
             try
             {
@@ -217,6 +247,8 @@ namespace XOCracker
 
             Settings.Default.Rows = Rows;
             Settings.Default.Columns = Columns;
+            Settings.Default.LastCell = LastCell;
+            Settings.Default.FirstCell = FirstCell;
             Settings.Default.Save();
 
             var presetDir = Path.Combine(Environment.CurrentDirectory, GamePresetDir);

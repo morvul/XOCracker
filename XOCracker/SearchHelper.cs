@@ -25,16 +25,6 @@ namespace XOCracker
             }
         }
 
-        public ImageContainer(Bitmap img, int trimSize)
-        {
-            _bmph = img.Height - trimSize * 2;
-            _bmpw = img.Width - trimSize * 2;
-            lock (this)
-            {
-                _sums = getImSumm(SearchHelper.ByteGray(img, trimSize), _bmph, _bmpw);
-            }
-        }
-
         int[,] getImSumm(byte[,] rgbValues, int n, int m)      // метод построения матрицы сумм заданного изображения
         {
             // пересчет матрицы сумм
@@ -66,9 +56,8 @@ namespace XOCracker
         /// <param name="fbmp">Искомое изображение.</param>
         /// <param name="deep">Точность анализа.</param>
         /// <param name="fault">Величина погрешности.</param>
-        /// <param name="cellShift">Размер обрезки изображения.</param>
         /// <returns></returns>
-        public Point Find(ImageContainer fbmp, int deep, int fault, int cellShift = 0)
+        public Point Find(ImageContainer fbmp, int deep, int fault)
         {
             Point pos = new Point();
             int fbmph = fbmp.GetHeight(),
@@ -88,15 +77,6 @@ namespace XOCracker
                     }
                 }
 
-            if (pos != Point.Empty && cellShift > 0)
-            {
-                var bdef = Difference(ref fbmp, pos.X + cellShift, pos.Y + cellShift, pos.X + cellShift + fbmpw, pos.Y + cellShift + fbmph, new Size(fbmpw, fbmph), deep);
-                if (bdef <= mindef)
-                {
-                    pos.X += cellShift;
-                    pos.Y += cellShift;
-                }
-            }
             return pos;
         }
 
@@ -120,7 +100,7 @@ namespace XOCracker
             }
 
             if (deep == 0)  // если достигнута максимальная глубина рекурсии - начать подъем
-                return Math.Abs(RSumm(x1 - size.Width + 1, y1 - size.Height + 1, x1, y1) - frgbS.RSumm(x1 - x0 - size.Width, y1 - y0 - size.Height, x1 - x0 - 1, y1 - y0 - 1));
+                return Math.Abs(RSumm(x1 - size.Width - 1, y1 - size.Height - 1, x1, y1) - frgbS.RSumm(x1 - x0 - size.Width, y1 - y0 - size.Height, x1 - x0 - 1, y1 - y0 - 1));
             if (size.Height > size.Width)
             {
                 hor = true;
@@ -232,12 +212,12 @@ namespace XOCracker
             img.UnlockBits(bmpd);
             return img;
         }
-        public static byte[,] ByteGray(Bitmap img, int trimSize = 0)
+        public static byte[,] ByteGray(Bitmap img)
         {
-            byte[,] mbGray = new byte[img.Height - trimSize * 2, img.Width - trimSize * 2];
-            int imgh = img.Height - trimSize * 2,
-                imgw = img.Width - trimSize * 2;
-            BitmapData bmpd = img.LockBits(new Rectangle(trimSize, trimSize, imgw, imgh), ImageLockMode.ReadWrite, PixelFormat.Format32bppRgb);
+            byte[,] mbGray = new byte[img.Height, img.Width];
+            int imgh = img.Height,
+                imgw = img.Width;
+            BitmapData bmpd = img.LockBits(new Rectangle(0, 0, imgw, imgh), ImageLockMode.ReadWrite, PixelFormat.Format32bppRgb);
             int bytes = bmpd.Stride * imgh;
             byte[] rgbValues = new byte[bytes];
             Marshal.Copy(bmpd.Scan0, rgbValues, 0, bytes);

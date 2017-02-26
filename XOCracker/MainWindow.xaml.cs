@@ -163,18 +163,33 @@ namespace XOCracker
 
         private void DelayChanged(object sender, TextChangedEventArgs e)
         {
+            if (DelayField.Text == "")
+            {
+                DelayField.Text = "0";
+            }
+
             _gameProcess.Delay = int.Parse(DelayField.Text);
         }
 
 
         private void AccuracyChanged(object sender, TextChangedEventArgs e)
         {
+            if (AccuracyField.Text == "")
+            {
+                AccuracyField.Text = "0";
+            }
+
             _gameProcess.AnalysisAccuracy = int.Parse(AccuracyField.Text);
         }
 
 
         private void DispersionChanged(object sender, TextChangedEventArgs e)
         {
+            if (DispersionField.Text == "")
+            {
+                DispersionField.Text = "0";
+            }
+
             _gameProcess.Dispersion = int.Parse(DispersionField.Text);
         }
 
@@ -202,6 +217,8 @@ namespace XOCracker
             XCellList.ItemsSource = _gamePreset.XCellSprites;
             OCellList.Items.Refresh();
             XCellList.Items.Refresh();
+            FirstCellField.Text = _gamePreset.FirstCell.ToString();
+            LastCellField.Text = _gamePreset.LastCell.ToString();
         }
 
         private void UpdateSpiteControlls(Image spriteControl, TextBlock spriteTextControl, Bitmap bitmap)
@@ -390,5 +407,24 @@ namespace XOCracker
 
         #endregion
 
+        private void FirstCellField_OnMouseLeftButtonUp(object sender, MouseButtonEventArgs e)
+        {
+            ScreenshotRegion screener = new ScreenshotRegion(this);
+            if (screener.ShowDialog() == true)
+            {
+                _gamePreset.FirstCell = screener.Rectangle;
+                UpdatePresetControls();
+            }
+        }
+
+        private void LastCellField_OnMouseLeftButtonUp(object sender, MouseButtonEventArgs e)
+        {
+            ScreenshotRegion screener = new ScreenshotRegion(this);
+            if (screener.ShowDialog() == true)
+            {
+                _gamePreset.LastCell = screener.Rectangle;
+                UpdatePresetControls();
+            }
+        }
     }
 }
