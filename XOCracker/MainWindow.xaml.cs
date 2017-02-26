@@ -1,4 +1,5 @@
-﻿using System.ComponentModel;
+﻿using System;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.Drawing;
 using System.IO;
@@ -7,6 +8,7 @@ using System.Text.RegularExpressions;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using System.Windows.Media.Imaging;
 using XOCracker.Enums;
 using XOCracker.Properties;
 using Image = System.Windows.Controls.Image;
@@ -51,7 +53,7 @@ namespace XOCracker
         }
 
         #endregion
-        
+
         #region Game process tab
 
         private void InitializeGameProcessTab()
@@ -69,7 +71,7 @@ namespace XOCracker
 
         private void OnGameStateUpdated()
         {
-            UpdateBoard();
+            Dispatcher.BeginInvoke(new Action(UpdateBoard));
         }
 
         private void UpdateBoard()
@@ -80,17 +82,21 @@ namespace XOCracker
                 Board.Children.Clear();
                 Board.Columns = _gamePreset.Columns;
                 Board.Rows = _gamePreset.Rows;
-                for (var rowId = 0; rowId < _gamePreset.Rows; rowId++)
+                for (var row = 0; row < _gamePreset.Rows; row++)
                 {
                     for (var column = 0; column < _gamePreset.Columns; column++)
                     {
-                        var cell = new Image
-                        {
-                            Source = SearchHelper.BitmapToImageSource(_gamePreset.FreeCellSprite)
-                        };
+                        var cell = new Image();
                         Board.Children.Add(cell);
+                        SetBoardCell(row, column, CellType.Unknown);
                     }
                 }
+            }
+
+            while (_gameProcess.UpdatedCells.Count > 0)
+            {
+                var updatedCell = _gameProcess.UpdatedCells.Dequeue();
+                SetBoardCell(updatedCell.Row, updatedCell.Column, updatedCell.CellType);
             }
         }
 
@@ -107,6 +113,9 @@ namespace XOCracker
                     break;
                 case CellType.XCell:
                     cell.Source = SearchHelper.BitmapToImageSource(_gamePreset.XCellSprites.FirstOrDefault());
+                    break;
+                case CellType.Unknown:
+                    cell.Source = new BitmapImage(new Uri("/Resources/11.gif", UriKind.Relative));
                     break;
             }
         }
@@ -171,7 +180,7 @@ namespace XOCracker
 
         #endregion
 
-            #region Preset tab
+        #region Preset tab
 
         private void InitializePresetTab()
         {

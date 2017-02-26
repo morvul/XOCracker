@@ -60,6 +60,7 @@
     <Compile Include="Converters\ImageConverter.cs" />
     <Compile Include="Enums\CellType.cs" />
     <Compile Include="GamePreset.cs" />
+    <Compile Include="Models\Cell.cs" />
     <Compile Include="SearchHelper.cs" />
     <Compile Include="GameProcess.cs" />
     <Compile Include="ScreenshotRegion.xaml.cs">
@@ -110,7 +111,7 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="Models\" />
+    <Resource Include="Resources\11.gif" />
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Resources\kde_gnome_fs_directory_accept.png" />

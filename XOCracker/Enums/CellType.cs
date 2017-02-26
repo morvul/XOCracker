@@ -2,7 +2,9 @@
 {
     public enum CellType
     {
-        Free, OCell, XCell,
-        Unknown
+        Unknown,
+        Free,
+        OCell,
+        XCell
     }
 }
