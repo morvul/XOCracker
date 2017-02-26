@@ -40,15 +40,9 @@ namespace XOCracker
             return rgbs;
         }
 
-        public int GetHeight()
-        {
-            return _bmph;
-        }
+        public int Height => _bmph;
 
-        public int GetWidth()
-        {
-            return _bmpw;
-        }
+        public int Width => _bmpw;
 
         /// <summary>
         /// Поиск изображения.
@@ -60,8 +54,8 @@ namespace XOCracker
         public Point Find(ImageContainer fbmp, int deep, int fault)
         {
             Point pos = new Point();
-            int fbmph = fbmp.GetHeight(),
-                fbmpw = fbmp.GetWidth();
+            int fbmph = fbmp.Height,
+                fbmpw = fbmp.Width;
             int mindef = fault + 1;
 
             // поиск области с нужной суммой
@@ -71,12 +65,11 @@ namespace XOCracker
                     var bdef = Difference(ref fbmp, x - fbmpw, y - fbmph, x, y, new Size(fbmpw, fbmph), deep);
                     if (bdef < mindef)
                     {
-                        pos.X = x - fbmpw;
-                        pos.Y = y - fbmph;
+                        pos.X = x;
+                        pos.Y = y;
                         mindef = bdef;
                     }
                 }
-
             return pos;
         }
 
@@ -94,13 +87,12 @@ namespace XOCracker
         public int Difference(ref ImageContainer frgbS, int x0, int y0, int x1, int y1, Size size, int deep)
         {
             bool hor;
-            if (x1 >= GetWidth() || y1 >= GetHeight())
+            if (x1 >= Width || y1 >= Height)
             {
                 return int.MaxValue;
             }
-
             if (deep == 0)  // если достигнута максимальная глубина рекурсии - начать подъем
-                return Math.Abs(RSumm(x1 - size.Width - 1, y1 - size.Height - 1, x1, y1) - frgbS.RSumm(x1 - x0 - size.Width, y1 - y0 - size.Height, x1 - x0 - 1, y1 - y0 - 1));
+                return Math.Abs(RSumm(x1 - size.Width + 1, y1 - size.Height + 1, x1, y1) - frgbS.RSumm(x1 - x0 - size.Width, y1 - y0 - size.Height, x1 - x0 - 1, y1 - y0 - 1));
             if (size.Height > size.Width)
             {
                 hor = true;
@@ -142,7 +134,8 @@ namespace XOCracker
         }
     }
 
-    public static class SearchHelper {
+    public static class SearchHelper
+    {
         public const int MagicShift = 7;
 
         public static int ColorsCmp(Color c1, Color c2)  // метод определения разности между двумя цветами (для построения игрового поля)
@@ -212,6 +205,7 @@ namespace XOCracker
             img.UnlockBits(bmpd);
             return img;
         }
+
         public static byte[,] ByteGray(Bitmap img)
         {
             byte[,] mbGray = new byte[img.Height, img.Width];

@@ -172,7 +172,7 @@ namespace XOCracker
             } while (pixelQueue.Count > 0);
             var width = downX - topX + 1;
             var height = downY - topY + 1;
-            Rectangle = new Rectangle(topX - SearchHelper.MagicShift, topY - SearchHelper.MagicShift, width, height);
+            Rectangle = new Rectangle(topX - SearchHelper.MagicShift - 1, topY - SearchHelper.MagicShift - 1, width, height);
             return SearchHelper.CaptureScreen(topX, topY, width, height, _winHandle);
         }
 

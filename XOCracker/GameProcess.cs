@@ -10,7 +10,6 @@ using System.Windows.Interop;
 using XOCracker.Enums;
 using XOCracker.Models;
 using XOCracker.Properties;
-using Point = System.Drawing.Point;
 using Size = System.Drawing.Size;
 
 namespace XOCracker
@@ -109,7 +108,6 @@ namespace XOCracker
 
         private void Monitoring()
         {
-            var isBoardUpdated = false;
             var screen = Screen.FromHandle(_winHandle);
             while (_isMonitoringRinning)
             {
@@ -196,22 +194,23 @@ namespace XOCracker
             int? minDiff = null;
             foreach (var possibleCell in PossibleCells)
             {
-                var x = cellCenterX - possibleCell.Key.GetWidth() / 2;
-                var y = cellCenterY - possibleCell.Key.GetHeight() / 2;
+                var x = cellCenterX - possibleCell.Key.Width / 2;
+                var y = cellCenterY - possibleCell.Key.Height / 2;
                 var image = possibleCell.Key;
-                var diff = screen.Difference(ref image, x, y, x + possibleCell.Key.GetWidth(), y + possibleCell.Key.GetHeight(),
-                    new Size(possibleCell.Key.GetWidth(), possibleCell.Key.GetHeight()), AnalysisAccuracy);
+                var diff = screen.Difference(ref image, x, y, x + image.Width, y + image.Height,
+                    new Size(image.Width, image.Height), AnalysisAccuracy);
                 if (minDiff == null || minDiff.Value > diff)
                 {
                     cell.X = x;
                     cell.Y = y;
-                    cell.Width = possibleCell.Key.GetWidth();
-                    cell.Height = possibleCell.Key.GetHeight();
+                    cell.Width = possibleCell.Key.Width;
+                    cell.Height = possibleCell.Key.Height;
                     cell.CellType = diff < Dispersion ? possibleCell.Value : CellType.Unknown;
                     minDiff = diff;
                 }
             }
 
+            var r = screen.Find(new ImageContainer(_gamePreset.FreeCellSprite), 1, 1);
             return cell;
         }
 
