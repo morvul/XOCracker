@@ -46,6 +46,10 @@ namespace XOCracker
             {
                 _winParams = new Rectangle((int)_appWindow.Left, (int)_appWindow.Top,
                  (int)_appWindow.Width, (int)_appWindow.Height);
+                if (_winHandle.ToInt32() == 0)
+                {
+                    _winHandle = new WindowInteropHelper(_appWindow).Handle;
+                }
             }
         }
 
@@ -108,9 +112,10 @@ namespace XOCracker
 
         private void Monitoring()
         {
-            var screen = Screen.FromHandle(_winHandle);
+            
             while (_isMonitoringRinning)
             {
+                var screen = Screen.FromHandle(_winHandle);
                 var screenShot = SearchHelper.CaptureScreen(SearchHelper.MagicShift, SearchHelper.MagicShift,
                     screen.Bounds.Width, screen.Bounds.Height, _winHandle);
 
@@ -131,6 +136,7 @@ namespace XOCracker
                 #endregion
 
                 var searchScreenObj = new ImageContainer(screenShot);
+                //screenShot.Save("aqaq.bmp");
                 UpdateBoard(searchScreenObj);
 
                 Thread.Sleep(Delay);
@@ -210,7 +216,7 @@ namespace XOCracker
                 }
             }
 
-            var r = screen.Find(new ImageContainer(_gamePreset.FreeCellSprite), 1, 1);
+            //var r = screen.Find(new ImageContainer(_gamePreset.FreeCellSprite), 1, 1);
             return cell;
         }
 
