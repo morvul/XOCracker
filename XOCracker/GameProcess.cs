@@ -24,6 +24,7 @@ namespace XOCracker
         private Rectangle _winParams;
         private Task _monitoringProcess;
         private bool _isMonitoringRinning;
+        private CellType _playerSide;
 
         private GameProcess()
         {
@@ -79,8 +80,21 @@ namespace XOCracker
 
         private void Update()
         {
+            PossibleCells = _gamePreset.OCellSprites
+                .Select(x => new KeyValuePair<ImageContainer, CellType>(new ImageContainer(x), CellType.OCell))
+                .Union(_gamePreset.XCellSprites
+                    .Select(x => new KeyValuePair<ImageContainer, CellType>(new ImageContainer(x), CellType.XCell)))
+                .Union(_gamePreset.FreeCellSprites
+                    .Select(x => new KeyValuePair<ImageContainer, CellType>(new ImageContainer(x), CellType.Free)))
+                .ToList();
+            TurnImage = new ImageContainer(_gamePreset.TurnSprite);
+            StartImage = new ImageContainer(_gamePreset.StartSprite);
             OnGameStateUpdated?.Invoke();
         }
+
+        public ImageContainer StartImage { get; set; }
+
+        public ImageContainer TurnImage { get; set; }
 
         internal static GameProcess Initialize(GamePreset gamePreset, Window appWindow)
         {
@@ -121,22 +135,15 @@ namespace XOCracker
 
         private void Monitoring()
         {
-            PossibleCells = _gamePreset.OCellSprites
-                .Select(x => new KeyValuePair<ImageContainer, CellType>(new ImageContainer(x), CellType.OCell))
-                .Union(_gamePreset.XCellSprites
-                    .Select(x => new KeyValuePair<ImageContainer, CellType>(new ImageContainer(x), CellType.XCell)))
-                .Union(_gamePreset.FreeCellSprites
-                    .Select(x => new KeyValuePair<ImageContainer, CellType>(new ImageContainer(x), CellType.Free)))
-                .ToList();
-            var turnImage = new ImageContainer(_gamePreset.TurnSprite);
-            var startImage = new ImageContainer(_gamePreset.StartSprite);
+            Update();
+            var isBoardUpdated = false;
             while (_isMonitoringRinning)
             {
                 var searchScreenObj = GetScreenShot();
-                var turnPoint = searchScreenObj.Find(turnImage, 1, 0);
+                var turnPoint = searchScreenObj.Find(TurnImage, 1, 0);
                 if (turnPoint != Point.Empty)
                 {
-                    UpdateBoard(searchScreenObj);
+                    isBoardUpdated = UpdateBoard(searchScreenObj);
                     if (IsGameStarted)
                     {
                         MakeTurn();
@@ -144,7 +151,7 @@ namespace XOCracker
                 }
                 else if(IsGameStarted)
                 {
-                    var startPoint = searchScreenObj.Find(startImage, 1, 0);
+                    var startPoint = searchScreenObj.Find(StartImage, 1, 0);
                     if (startPoint != Point.Empty)
                     {
                         startPoint.X -= _gamePreset.StartSprite.Width / 2;
@@ -153,6 +160,10 @@ namespace XOCracker
                     }
                 }
 
+                if (isBoardUpdated)
+                {
+                    OnGameStateUpdated?.Invoke();
+                }
                 Thread.Sleep(Delay);
             }
         }
@@ -185,14 +196,15 @@ namespace XOCracker
         private void MakeTurn()
         {
             double stepСomplexity = 0;
-            var goodCell = BotLogic.GetStep(Board, _gamePreset.VinLength, _gamePreset.PlayerSide, ref stepСomplexity);
+            var goodCell = BotLogic.GetStep(Board, _gamePreset.VinLength, _playerSide, ref stepСomplexity);
             if (goodCell != null)
             {
                 Thread.Sleep(Rd.Next(MaxTurnDelay));
                 if (IsGameStarted)
                 {
                     ClickCell(goodCell.Value);
-                    _gamePreset.PlayerSide = GetPlayerSide(goodCell.Value);
+                    _playerSide = GetPlayerSide(goodCell.Value);
+                    SetBoardCell(new Cell(_playerSide, goodCell.Value.Y, goodCell.Value.X));
                 }
             }
 
@@ -204,6 +216,9 @@ namespace XOCracker
             Thread.Sleep(500);
             var screen = GetScreenShot();
             var cellType = UpdateCellType(turnCell.Y, turnCell.X, screen).CellType;
+            if (cellType != _playerSide)
+            {
+            }
             return cellType;
         }
 
@@ -224,7 +239,7 @@ namespace XOCracker
             return new Point(x, y);
         }
 
-        private void UpdateBoard(ImageContainer screen)
+        private bool UpdateBoard(ImageContainer screen)
         {
             bool isBoardUpdated = false;
             if (Board.GetLength(0) != _gamePreset.Rows || Board.GetLength(1) != _gamePreset.Columns)
@@ -241,10 +256,7 @@ namespace XOCracker
                 }
             }
 
-            if (isBoardUpdated)
-            {
-                OnGameStateUpdated?.Invoke();
-            }
+            return isBoardUpdated;
         }
 
         private bool SetBoardCell(Cell cell)
@@ -278,10 +290,12 @@ namespace XOCracker
             int? minDiff = null;
             foreach (var possibleCell in PossibleCells)
             {
-                x = cellCenterX - possibleCell.Key.Width / 2;
-                y = cellCenterY - possibleCell.Key.Height / 2;
                 var image = possibleCell.Key;
-                var diff = screen.Difference(ref image, x, y, x + width - 1, y + width - 1, new Size(width - 1, width - 1), AnalysisAccuracy);
+                x = cellCenterX - image.Width / 2;
+                y = cellCenterY - image.Height / 2;
+                width = image.Width - 1;
+                height = image.Height - 1;
+                var diff = screen.Difference(ref image, x, y, x + width, y + height, new Size(width, height), AnalysisAccuracy);
                 if (minDiff == null || minDiff.Value > diff)
                 {
                     cell.X = x;

@@ -23,14 +23,12 @@ namespace XOCracker
         private Rectangle _firstCell;
         private Rectangle _lastCell;
         private int _vinLength;
-        private CellType _playerSide;
 
         private GamePreset()
         {
             FreeCellSprites = new List<Bitmap>();
             OCellSprites = new List<Bitmap>();
             XCellSprites = new List<Bitmap>();
-            PlayerSide = CellType.XCell;
         }
 
         public bool HasChanges { get; set; }
@@ -168,25 +166,12 @@ namespace XOCracker
             }
         }
 
-        public CellType PlayerSide
-        {
-            get { return _playerSide; }
-            set
-            {
-                if (_playerSide != value)
-                {
-                    _playerSide = value;
-                    HasChanges = true;
-                }
-            }
-        }
-
         public bool IsReady()
         {
             return StartSprite != null && TurnSprite != null 
                 && FreeCellSprites.Count > 0 && OCellSprites.Count > 0 && XCellSprites.Count > 0
                 && Rows > 0 && Columns > 0 && FirstCell != Rectangle.Empty && LastCell != Rectangle.Empty
-                && VinLength > 0 && (PlayerSide == CellType.OCell || PlayerSide == CellType.XCell);
+                && VinLength > 0;
         }
 
         public void Reset()
@@ -197,7 +182,6 @@ namespace XOCracker
             Columns = 0;
             LastCell = Rectangle.Empty;
             FirstCell = Rectangle.Empty;
-            PlayerSide = CellType.XCell;
             VinLength = 0;
             if (FreeCellSprites.Count > 0)
             {
