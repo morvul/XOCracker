@@ -39,6 +39,8 @@ namespace XOCracker
             Height = Settings.Default.WinHeight;
             Top = Settings.Default.WinTop;
             Left = Settings.Default.WinLeft;
+            Topmost = Settings.Default.TopMost;
+            SetOnTopFlag.IsChecked = Topmost;
         }
 
         protected override void OnClosing(CancelEventArgs e)
@@ -48,6 +50,7 @@ namespace XOCracker
             Settings.Default.WinHeight = Height;
             Settings.Default.WinTop = Top;
             Settings.Default.WinLeft = Left;
+            Settings.Default.TopMost = Topmost;
             Settings.Default.Save();
             base.OnClosing(e);
         }
@@ -62,6 +65,8 @@ namespace XOCracker
             DelayField.Text = _gameProcess.Delay.ToString();
             AccuracyField.Text = _gameProcess.AnalysisAccuracy.ToString();
             DispersionField.Text = _gameProcess.Dispersion.ToString();
+            MouseSpeedField.Text = _gameProcess.MouseSpeed.ToString();
+            MaxTurnDelayField.Text = _gameProcess.MaxTurnDelay.ToString();
             _gameProcess.OnGameStateUpdated += OnGameStateUpdated;
             if (!GameProcessTab.IsSelected)
             {
@@ -93,6 +98,12 @@ namespace XOCracker
                 }
             }
 
+            if (_gameProcess == null)
+            {
+                return;
+            }
+
+            BoardInfoField.Text = _gameProcess.BoardInfo;
             while (_gameProcess.UpdatedCells.Count > 0)
             {
                 var updatedCell = _gameProcess.UpdatedCells.Dequeue();
@@ -106,7 +117,7 @@ namespace XOCracker
             switch (cellType)
             {
                 case CellType.Free:
-                    cell.Source = SearchHelper.BitmapToImageSource(_gamePreset.FreeCellSprite);
+                    cell.Source = SearchHelper.BitmapToImageSource(_gamePreset.FreeCellSprites.FirstOrDefault());
                     break;
                 case CellType.OCell:
                     cell.Source = SearchHelper.BitmapToImageSource(_gamePreset.OCellSprites.FirstOrDefault());
@@ -122,6 +133,8 @@ namespace XOCracker
 
         private void UpdateGameProcessState()
         {
+            if (_gameProcess == null)
+            { return; }
             if (!_gamePreset.IsReady())
             {
                 TabControl.SelectedIndex = 0;
@@ -138,6 +151,9 @@ namespace XOCracker
             {
                 _gameProcess.StopMonitoring();
             }
+
+            StartCommand.Visibility = _gameProcess.IsGameStarted ? Visibility.Collapsed : Visibility.Visible;
+            StopCommand.Visibility = _gameProcess.IsGameStarted ? Visibility.Visible : Visibility.Collapsed;
         }
 
         private void TabControl_OnSelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -193,6 +209,27 @@ namespace XOCracker
             _gameProcess.Dispersion = int.Parse(DispersionField.Text);
         }
 
+        private void MouseSpeedChanged(object sender, TextChangedEventArgs e)
+        {
+            if (MouseSpeedField.Text == "")
+            {
+                MouseSpeedField.Text = "0";
+            }
+
+            _gameProcess.MouseSpeed = int.Parse(MouseSpeedField.Text);
+        }
+
+
+        private void MaxTurnDelayFieldChanged(object sender, TextChangedEventArgs e)
+        {
+            if (MaxTurnDelayField.Text == "")
+            {
+                MaxTurnDelayField.Text = "0";
+            }
+
+            _gameProcess.MaxTurnDelay = int.Parse(MaxTurnDelayField.Text);
+        }
+
         #endregion
 
         #region Preset tab
@@ -211,14 +248,16 @@ namespace XOCracker
             BoardColumnsField.Text = _gamePreset.Columns.ToString();
             UpdateSpiteControlls(StartSprite, StartSpriteText, _gamePreset.StartSprite);
             UpdateSpiteControlls(TurnSprite, TurnSpriteText, _gamePreset.TurnSprite);
-            UpdateSpiteControlls(FreeCellSprite, FreeCellSpriteText, _gamePreset.FreeCellSprite);
             GameProcessTab.IsEnabled = _gamePreset.IsReady();
+            FreeCellList.ItemsSource = _gamePreset.FreeCellSprites;
             OCellList.ItemsSource = _gamePreset.OCellSprites;
             XCellList.ItemsSource = _gamePreset.XCellSprites;
+            FreeCellList.Items.Refresh();
             OCellList.Items.Refresh();
             XCellList.Items.Refresh();
             FirstCellField.Text = _gamePreset.FirstCell.ToString();
             LastCellField.Text = _gamePreset.LastCell.ToString();
+            WinLengthField.Text = _gamePreset.VinLength.ToString();
         }
 
         private void UpdateSpiteControlls(Image spriteControl, TextBlock spriteTextControl, Bitmap bitmap)
@@ -258,12 +297,22 @@ namespace XOCracker
             }
         }
 
-        private void FreeCellSpriteSelectionCommand_Click(object sender, RoutedEventArgs e)
+        private void FirstCellField_OnMouseLeftButtonUp(object sender, MouseButtonEventArgs e)
         {
             ScreenshotRegion screener = new ScreenshotRegion(this);
             if (screener.ShowDialog() == true)
             {
-                _gamePreset.FreeCellSprite = screener.Picture;
+                _gamePreset.FirstCell = screener.Rectangle;
+                UpdatePresetControls();
+            }
+        }
+
+        private void LastCellField_OnMouseLeftButtonUp(object sender, MouseButtonEventArgs e)
+        {
+            ScreenshotRegion screener = new ScreenshotRegion(this);
+            if (screener.ShowDialog() == true)
+            {
+                _gamePreset.LastCell = screener.Rectangle;
                 UpdatePresetControls();
             }
         }
@@ -307,6 +356,16 @@ namespace XOCracker
             if (int.TryParse(BoardColumnsField.Text, out columns))
             {
                 _gamePreset.Columns = columns;
+                UpdatePresetControls();
+            }
+        }
+
+        private void WinLengthFieldChanged(object sender, TextChangedEventArgs e)
+        {
+            int vinLength;
+            if (int.TryParse(WinLengthField.Text, out vinLength))
+            {
+                _gamePreset.VinLength = vinLength;
                 UpdatePresetControls();
             }
         }
@@ -357,6 +416,32 @@ namespace XOCracker
             }
         }
 
+
+        private void FreeCellSpriteSelectionCommand_Click(object sender, RoutedEventArgs e)
+        {
+            var image = (Bitmap)((Button)sender).Tag;
+            ScreenshotRegion screener = new ScreenshotRegion(this);
+            if (screener.ShowDialog() == true)
+            {
+                var itemIndex = _gamePreset.FreeCellSprites.IndexOf(image);
+                _gamePreset.FreeCellSprites.RemoveAt(itemIndex);
+                _gamePreset.FreeCellSprites.Insert(itemIndex, screener.Picture);
+                _gamePreset.HasChanges = true;
+                UpdatePresetControls();
+            }
+        }
+        
+        private void AddNewFreeCellSprite_Click(object sender, RoutedEventArgs e)
+        {
+            ScreenshotRegion screener = new ScreenshotRegion(this);
+            if (screener.ShowDialog() == true)
+            {
+                _gamePreset.FreeCellSprites.Add(screener.Picture);
+                _gamePreset.HasChanges = true;
+                UpdatePresetControls();
+            }
+        }
+
         private void AddNewOCellSprite_Click(object sender, RoutedEventArgs e)
         {
             ScreenshotRegion screener = new ScreenshotRegion(this);
@@ -395,6 +480,15 @@ namespace XOCracker
             UpdatePresetControls();
         }
 
+
+        private void RemoveFreeCell_Click(object sender, RoutedEventArgs e)
+        {
+            var image = (Bitmap)((MenuItem)sender).Tag;
+            _gamePreset.FreeCellSprites.Remove(image);
+            _gamePreset.HasChanges = true;
+            UpdatePresetControls();
+        }
+
         private void OpenPresetDirCommand_Click(object sender, RoutedEventArgs e)
         {
             if (!Directory.Exists(_gamePreset.DirectoryPath))
@@ -407,24 +501,10 @@ namespace XOCracker
 
         #endregion
 
-        private void FirstCellField_OnMouseLeftButtonUp(object sender, MouseButtonEventArgs e)
-        {
-            ScreenshotRegion screener = new ScreenshotRegion(this);
-            if (screener.ShowDialog() == true)
-            {
-                _gamePreset.FirstCell = screener.Rectangle;
-                UpdatePresetControls();
-            }
-        }
 
-        private void LastCellField_OnMouseLeftButtonUp(object sender, MouseButtonEventArgs e)
+        private void SetOnTopFlag_Click(object sender, RoutedEventArgs e)
         {
-            ScreenshotRegion screener = new ScreenshotRegion(this);
-            if (screener.ShowDialog() == true)
-            {
-                _gamePreset.LastCell = screener.Rectangle;
-                UpdatePresetControls();
-            }
+            Topmost = SetOnTopFlag.IsChecked == true;
         }
     }
 }

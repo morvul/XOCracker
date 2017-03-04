@@ -154,5 +154,53 @@ namespace XOCracker.Properties {
                 this["LastCell"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("True")]
+        public bool TopMost {
+            get {
+                return ((bool)(this["TopMost"]));
+            }
+            set {
+                this["TopMost"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("0")]
+        public int VinLength {
+            get {
+                return ((int)(this["VinLength"]));
+            }
+            set {
+                this["VinLength"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("50")]
+        public int MouseSpeed {
+            get {
+                return ((int)(this["MouseSpeed"]));
+            }
+            set {
+                this["MouseSpeed"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("10000")]
+        public int MaxTurnDelay {
+            get {
+                return ((int)(this["MaxTurnDelay"]));
+            }
+            set {
+                this["MaxTurnDelay"] = value;
+            }
+        }
     }
 }

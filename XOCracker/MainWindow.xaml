@@ -1,10 +1,7 @@
 ﻿<Window x:Class="XOCracker.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:converters="clr-namespace:XOCracker.Converters"
-        mc:Ignorable="d"
         Title="XOCracker" Height="330" Width="480">
     <Window.Resources>
         <converters:ImageConverter x:Key="ImageConverter"/>
@@ -69,6 +66,7 @@
                         <Grid>
                             <Grid.RowDefinitions>
                                 <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
                                 <RowDefinition Height="*"/>
                             </Grid.RowDefinitions>
                             <Grid.ColumnDefinitions>
@@ -80,9 +78,9 @@
                             <GroupBox Grid.ColumnSpan="3" Header="Size">
                                 <Grid>
                                     <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto"/>
                                         <ColumnDefinition/>
-                                        <ColumnDefinition/>
-                                        <ColumnDefinition/>
+                                        <ColumnDefinition Width="Auto"/>
                                         <ColumnDefinition/>
                                     </Grid.ColumnDefinitions>
                                     <Grid.RowDefinitions>
@@ -102,26 +100,59 @@
                                     <Label Content="First cell" Grid.Row="1" Grid.Column="0"/>
                                     <TextBox Name="FirstCellField" Grid.Column="1" Grid.Row="1" IsReadOnly="True" Background="LightBlue"
                                              PreviewMouseDown="FirstCellField_OnMouseLeftButtonUp"
-                                             PreviewTextInput="NumberValidationTextBox" DataObject.Pasting="TextBoxPasting"/>
+                                             PreviewTextInput="NumberValidationTextBox" 
+                                             DataObject.Pasting="TextBoxPasting"
+                                             TextWrapping="Wrap" AcceptsReturn="True" Height="Auto"/>
                                     <Label Grid.Column="2" Grid.Row="1" Content="Last cell"/>
                                     <TextBox Name="LastCellField" Grid.Column="3" Grid.Row="1" IsReadOnly="True" Background="LightBlue"
                                              PreviewMouseDown="LastCellField_OnMouseLeftButtonUp"
+                                             PreviewTextInput="NumberValidationTextBox"
+                                             DataObject.Pasting="TextBoxPasting"
+                                             TextWrapping="Wrap" AcceptsReturn="True" Height="Auto"/>
+                                </Grid>
+                            </GroupBox>
+                            <GroupBox Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="3" Header="Game options">
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition/>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition/>
+                                    </Grid.ColumnDefinitions>
+
+                                    <Label Content="Win length"/>
+                                    <TextBox Name="WinLengthField" Grid.Column="1" Grid.Row="0"
+                                             TextChanged="WinLengthFieldChanged"
                                              PreviewTextInput="NumberValidationTextBox" DataObject.Pasting="TextBoxPasting"/>
                                 </Grid>
                             </GroupBox>
-                            <GroupBox Grid.Column="0" Grid.Row="1" Header="Free cell">
-                                <Button Name="FreeCellSpriteSelectionCommand" 
-                                    Click="FreeCellSpriteSelectionCommand_Click" 
-                                    Style="{StaticResource Flat}">
-                                    <UniformGrid Columns="1">
-                                        <Image Name="FreeCellSprite" />
-                                        <TextBlock Name="FreeCellSpriteText" ToolTip="Click to select a sprite region">
-                                            Click here
-                                        </TextBlock>
-                                    </UniformGrid>
-                                </Button>
+                            <GroupBox Grid.Column="0" Grid.Row="2" Header="Free cells">
+                                <Grid>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="*"/>
+                                        <RowDefinition Height="Auto"/>
+                                    </Grid.RowDefinitions>
+
+                                    <ListBox Name="FreeCellList" HorizontalContentAlignment="Stretch" ScrollViewer.HorizontalScrollBarVisibility="Disabled">
+                                        <ListBox.ItemTemplate>
+                                            <DataTemplate>
+                                                <Button Click="FreeCellSpriteSelectionCommand_Click" 
+                                                    Tag ="{Binding}" Style="{StaticResource Flat}">
+                                                    <Image Source="{Binding Converter={StaticResource ImageConverter}}"
+                                                           MaxWidth="{Binding RelativeSource={RelativeSource Self}, Path=Source.PixelWidth}"/>
+                                                    <Button.ContextMenu>
+                                                        <ContextMenu>
+                                                            <MenuItem Header="Remove" Click="RemoveFreeCell_Click" Tag="{Binding}"/>
+                                                        </ContextMenu>
+                                                    </Button.ContextMenu>
+                                                </Button>
+                                            </DataTemplate>
+                                        </ListBox.ItemTemplate>
+                                    </ListBox>
+                                    <Button Grid.Row="1" Click="AddNewFreeCellSprite_Click" Content="Add"/>
+                                </Grid>
                             </GroupBox>
-                            <GroupBox Grid.Column="1" Grid.Row="1" Header="O cells">
+                            <GroupBox Grid.Column="1" Grid.Row="2" Header="O cells">
                                 <Grid>
                                     <Grid.RowDefinitions>
                                         <RowDefinition Height="*"/>
@@ -147,7 +178,7 @@
                                     <Button Grid.Row="1" Click="AddNewOCellSprite_Click" Content="Add"/>
                                 </Grid>
                             </GroupBox>
-                            <GroupBox Grid.Column="2" Grid.Row="1" Header="X cells">
+                            <GroupBox Grid.Column="2" Grid.Row="2" Header="X cells">
                                 <Grid>
                                     <Grid.RowDefinitions>
                                         <RowDefinition Height="*"/>
@@ -201,9 +232,16 @@
                         <ColumnDefinition Width="Auto"/>
                         <ColumnDefinition Width="Auto"/>
                     </Grid.ColumnDefinitions>
-
+                    
                     <Border HorizontalAlignment="Center" VerticalAlignment="Center" BorderThickness="2" BorderBrush="Gainsboro">
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="*"/>
+                                <RowDefinition Height="Auto"/>
+                            </Grid.RowDefinitions>
                         <UniformGrid Name="Board"/>
+                            <TextBox Name="BoardInfoField" IsReadOnly="True" Grid.Row="1"/>
+                        </Grid>
                     </Border>
                     <Separator Grid.Column="1" Style="{StaticResource {x:Static ToolBar.SeparatorStyleKey}}"/>
                     <Grid Grid.Column="2" MinWidth="100">
@@ -211,6 +249,8 @@
                             <RowDefinition Height="Auto"/>
                             <RowDefinition Height="Auto"/>
                             <RowDefinition Height="*"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
                             <RowDefinition Height="Auto"/>
                             <RowDefinition Height="Auto"/>
                             <RowDefinition Height="Auto"/>
@@ -231,9 +271,21 @@
                             <TextBox Name="DelayField" TextChanged="DelayChanged"
                                      PreviewTextInput="NumberValidationTextBox" DataObject.Pasting="TextBoxPasting"/>
                         </GroupBox>
+                        <GroupBox Grid.Row="6" Header="Mouse speed">
+                            <TextBox Name="MouseSpeedField" TextChanged="MouseSpeedChanged"
+                                     PreviewTextInput="NumberValidationTextBox" DataObject.Pasting="TextBoxPasting"/>
+                        </GroupBox>
+                        <GroupBox Grid.Row="7" Header="Max turn delay">
+                            <TextBox Name="MaxTurnDelayField" TextChanged="MaxTurnDelayFieldChanged"
+                                     PreviewTextInput="NumberValidationTextBox" DataObject.Pasting="TextBoxPasting"/>
+                        </GroupBox>
                     </Grid>
                 </Grid>
             </TabItem>
         </TabControl>
+        <CheckBox Name="SetOnTopFlag" Click="SetOnTopFlag_Click" Content="Set on Top" 
+                  HorizontalAlignment="Right" 
+                  VerticalAlignment="Top"
+                  Margin="3"/>
     </Grid>
 </Window>

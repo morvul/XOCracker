@@ -58,9 +58,11 @@
       <SubType>Designer</SubType>
     </ApplicationDefinition>
     <Compile Include="Converters\ImageConverter.cs" />
+    <Compile Include="BotLogic.cs" />
     <Compile Include="Enums\CellType.cs" />
     <Compile Include="GamePreset.cs" />
     <Compile Include="Models\Cell.cs" />
+    <Compile Include="Mouse.cs" />
     <Compile Include="SearchHelper.cs" />
     <Compile Include="GameProcess.cs" />
     <Compile Include="ScreenshotRegion.xaml.cs">

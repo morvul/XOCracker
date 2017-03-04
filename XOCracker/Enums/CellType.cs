@@ -1,6 +1,6 @@
 ﻿namespace XOCracker.Enums
 {
-    public enum CellType
+    public enum CellType : int
     {
         Unknown,
         Free,

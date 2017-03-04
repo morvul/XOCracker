@@ -4,6 +4,7 @@ using System.Drawing;
 using System.Drawing.Imaging;
 using System.IO;
 using System.Windows;
+using XOCracker.Enums;
 using XOCracker.Properties;
 
 namespace XOCracker
@@ -16,16 +17,20 @@ namespace XOCracker
         private int _columns;
         private int _rows;
         private Bitmap _turnSprite;
-        private Bitmap _freeCellSprite;
         private List<Bitmap> _oCellSprites;
         private List<Bitmap> _xCellSprites;
+        private List<Bitmap> _freeCellSprites;
         private Rectangle _firstCell;
         private Rectangle _lastCell;
+        private int _vinLength;
+        private CellType _playerSide;
 
         private GamePreset()
         {
+            FreeCellSprites = new List<Bitmap>();
             OCellSprites = new List<Bitmap>();
             XCellSprites = new List<Bitmap>();
+            PlayerSide = CellType.XCell;
         }
 
         public bool HasChanges { get; set; }
@@ -56,18 +61,19 @@ namespace XOCracker
             }
         }
 
-        public Bitmap FreeCellSprite
+        public List<Bitmap> FreeCellSprites
         {
-            get { return _freeCellSprite; }
+            get { return _freeCellSprites; }
             set
             {
-                if (_freeCellSprite != value)
+                if (_freeCellSprites != value)
                 {
-                    _freeCellSprite = value;
+                    _freeCellSprites = value;
                     HasChanges = true;
                 }
             }
         }
+
 
         public List<Bitmap> XCellSprites
         {
@@ -149,20 +155,56 @@ namespace XOCracker
             }
         }
 
+        public int VinLength
+        {
+            get { return _vinLength; }
+            set
+            {
+                if (_vinLength != value)
+                {
+                    _vinLength = value;
+                    HasChanges = true;
+                }
+            }
+        }
+
+        public CellType PlayerSide
+        {
+            get { return _playerSide; }
+            set
+            {
+                if (_playerSide != value)
+                {
+                    _playerSide = value;
+                    HasChanges = true;
+                }
+            }
+        }
+
         public bool IsReady()
         {
-            return StartSprite != null && TurnSprite != null && FreeCellSprite != null
-                && (OCellSprites.Count > 0) && (XCellSprites.Count > 0)
-                && Rows > 0 && Columns > 0 && FirstCell != Rectangle.Empty && LastCell != Rectangle.Empty;
+            return StartSprite != null && TurnSprite != null 
+                && FreeCellSprites.Count > 0 && OCellSprites.Count > 0 && XCellSprites.Count > 0
+                && Rows > 0 && Columns > 0 && FirstCell != Rectangle.Empty && LastCell != Rectangle.Empty
+                && VinLength > 0 && (PlayerSide == CellType.OCell || PlayerSide == CellType.XCell);
         }
 
         public void Reset()
         {
             StartSprite = null;
             TurnSprite = null;
-            FreeCellSprite = null;
             Rows = 0;
             Columns = 0;
+            LastCell = Rectangle.Empty;
+            FirstCell = Rectangle.Empty;
+            PlayerSide = CellType.XCell;
+            VinLength = 0;
+            if (FreeCellSprites.Count > 0)
+            {
+                FreeCellSprites.Clear();
+                HasChanges = true;
+            }
+
             if (OCellSprites.Count > 0)
             {
                 OCellSprites.Clear();
@@ -182,6 +224,7 @@ namespace XOCracker
             FirstCell = Settings.Default.FirstCell;
             LastCell = Settings.Default.LastCell;
             Columns = Settings.Default.Columns;
+            VinLength = Settings.Default.VinLength;
             try
             {
                 var presetDir = Path.Combine(Environment.CurrentDirectory, GamePresetDir);
@@ -189,7 +232,20 @@ namespace XOCracker
                 {
                     StartSprite = FromFile(nameof(StartSprite), presetDir);
                     TurnSprite = FromFile(nameof(TurnSprite), presetDir);
-                    FreeCellSprite = FromFile(nameof(FreeCellSprite), presetDir);
+                    var freeCellsDir = Path.Combine(presetDir, nameof(FreeCellSprites));
+                    if (Directory.Exists(freeCellsDir))
+                    {
+                        FreeCellSprites.Clear();
+                        var files = Directory.GetFiles(freeCellsDir);
+                        foreach (var file in files)
+                        {
+                            var freeCellSprite = FromFile(file);
+                            if (freeCellSprite != null)
+                            {
+                                FreeCellSprites.Add(freeCellSprite);
+                            }
+                        }
+                    }
 
                     var oCellsDir = Path.Combine(presetDir, nameof(OCellSprites));
                     if (Directory.Exists(oCellsDir))
@@ -249,6 +305,7 @@ namespace XOCracker
             Settings.Default.Columns = Columns;
             Settings.Default.LastCell = LastCell;
             Settings.Default.FirstCell = FirstCell;
+            Settings.Default.VinLength = VinLength;
             Settings.Default.Save();
 
             var presetDir = Path.Combine(Environment.CurrentDirectory, GamePresetDir);
@@ -261,8 +318,23 @@ namespace XOCracker
             StartSprite?.Save(startSpriteFileName, ImageFormat.Bmp);
             var turnSpriteFileName = Path.Combine(presetDir, nameof(TurnSprite) + ImgExt);
             TurnSprite?.Save(turnSpriteFileName);
-            var freeCellSpriteFileName = Path.Combine(presetDir, nameof(FreeCellSprite) + ImgExt);
-            FreeCellSprite?.Save(freeCellSpriteFileName);
+
+            var freeCellsDir = Path.Combine(presetDir, nameof(FreeCellSprites));
+            if (!Directory.Exists(freeCellsDir))
+            {
+                Directory.CreateDirectory(freeCellsDir);
+            }
+            else
+            {
+                DeleteSpriteFiles(freeCellsDir);
+            }
+
+            var index = 0;
+            foreach (var freeCellSprite in FreeCellSprites)
+            {
+                var oCellSpriteFileName = Path.Combine(freeCellsDir, nameof(freeCellSprite) + ++index + ImgExt);
+                freeCellSprite.Save(oCellSpriteFileName);
+            }
 
             var oCellsDir = Path.Combine(presetDir, nameof(OCellSprites));
             if (!Directory.Exists(oCellsDir))
@@ -274,7 +346,7 @@ namespace XOCracker
                 DeleteSpriteFiles(oCellsDir);
             }
 
-            var index = 0;
+            index = 0;
             foreach (var oCellSprite in OCellSprites)
             {
                 var oCellSpriteFileName = Path.Combine(oCellsDir, nameof(oCellSprite) + ++index + ImgExt);

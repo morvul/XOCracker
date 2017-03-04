@@ -14,14 +14,16 @@ namespace XOCracker
         private readonly int[,] _sums;
         private readonly int _bmph;
         private readonly int _bmpw;
+        private readonly byte[,] _rgbValues;
 
         public ImageContainer(Bitmap img)
         {
             _bmph = img.Height;
             _bmpw = img.Width;
+            _rgbValues = SearchHelper.ByteGray(img);
             lock (this)
             {
-                _sums = getImSumm(SearchHelper.ByteGray(img), _bmph, _bmpw);
+                _sums = getImSumm(_rgbValues, _bmph, _bmpw);
             }
         }
 
@@ -92,7 +94,8 @@ namespace XOCracker
                 return int.MaxValue;
             }
             if (deep == 0)  // если достигнута максимальная глубина рекурсии - начать подъем
-                return Math.Abs(RSumm(x1 - size.Width + 1, y1 - size.Height + 1, x1, y1) - frgbS.RSumm(x1 - x0 - size.Width, y1 - y0 - size.Height, x1 - x0 - 1, y1 - y0 - 1));
+                return Math.Abs(RSumm(x1 - size.Width + 1, y1 - size.Height + 1, x1, y1) 
+                        - frgbS.RSumm(x1 - x0 - size.Width, y1 - y0 - size.Height, x1 - x0 - 1, y1 - y0 - 1));
             if (size.Height > size.Width)
             {
                 hor = true;
@@ -131,6 +134,16 @@ namespace XOCracker
                 if (j0 > 0) return _sums[i1, j1] - _sums[i1, j0 - 1];
                 return _sums[i1, j1];
             }
+        }
+
+        public int? GetPixel(int x, int y)
+        {
+            if (x < 0 || y < 0 || x >= _bmpw || y >= _bmph)
+            {
+                return null;
+            }
+
+            return _rgbValues[y, x];
         }
     }
 
