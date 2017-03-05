@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -17,6 +18,7 @@ namespace XOCracker
 {
     public class GameProcess
     {
+        private const string ScreensDir = "Screenshots"; 
         private static readonly Random Rd = new Random();
         private readonly GamePreset _gamePreset;
         private readonly Window _appWindow;
@@ -149,16 +151,24 @@ namespace XOCracker
                     {
                         MakeTurn();
                     }
-                }
+               } 
                 else if(IsGameStarted)
                 {
                     var startPoint = searchScreenObj.Find(StartImage, 1, 0);
                     if (startPoint != Point.Empty)
                     {
+
+                        if (!Directory.Exists(ScreensDir))
+                        {
+                            Directory.CreateDirectory(ScreensDir);
+                        }
+
                         var screen = Screen.FromHandle(_winHandle);
                         var screenShot = SearchHelper.CaptureScreen(SearchHelper.MagicShift, SearchHelper.MagicShift,
                             screen.Bounds.Width, screen.Bounds.Height, _winHandle);
-                        screenShot.Save($"{DateTime.Now.ToShortDateString()} {DateTime.Now.ToLongTimeString()}.bmp");
+                        var fileName = $"{DateTime.Now.ToString("yyyy.MM.dd HH.mm.ss")}.bmp";
+                        fileName = Path.Combine(Environment.CurrentDirectory, ScreensDir, fileName);
+                        screenShot.Save(fileName);
                         startPoint.X -= _gamePreset.StartSprite.Width / 2;
                         startPoint.Y -= _gamePreset.StartSprite.Height / 2;
                         Mouse.ClickIt(startPoint, MouseSpeed, Mouse.Buttons.Left);
