@@ -3,10 +3,10 @@
   <Profiles />
   <Settings>
     <Setting Name="Rows" Type="System.Int32" Scope="User">
-      <Value Profile="(Default)">0</Value>
+      <Value Profile="(Default)">19</Value>
     </Setting>
     <Setting Name="Columns" Type="System.Int32" Scope="User">
-      <Value Profile="(Default)">0</Value>
+      <Value Profile="(Default)">19</Value>
     </Setting>
     <Setting Name="WinWidth" Type="System.Double" Scope="User">
       <Value Profile="(Default)">440</Value>
@@ -24,10 +24,10 @@
       <Value Profile="(Default)">300</Value>
     </Setting>
     <Setting Name="Accuracy" Type="System.Int32" Scope="User">
-      <Value Profile="(Default)">5</Value>
+      <Value Profile="(Default)">4</Value>
     </Setting>
     <Setting Name="Dispersion" Type="System.Int32" Scope="User">
-      <Value Profile="(Default)">1</Value>
+      <Value Profile="(Default)">111111</Value>
     </Setting>
     <Setting Name="FirstCell" Type="System.Drawing.Rectangle" Scope="User">
       <Value Profile="(Default)">0, 0, 0, 0</Value>
@@ -39,13 +39,13 @@
       <Value Profile="(Default)">True</Value>
     </Setting>
     <Setting Name="VinLength" Type="System.Int32" Scope="User">
-      <Value Profile="(Default)">0</Value>
+      <Value Profile="(Default)">5</Value>
     </Setting>
     <Setting Name="MouseSpeed" Type="System.Int32" Scope="User">
-      <Value Profile="(Default)">50</Value>
+      <Value Profile="(Default)">1</Value>
     </Setting>
     <Setting Name="MaxTurnDelay" Type="System.Int32" Scope="User">
-      <Value Profile="(Default)">10000</Value>
+      <Value Profile="(Default)">0</Value>
     </Setting>
   </Settings>
 </SettingsFile>

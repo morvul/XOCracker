@@ -30,6 +30,7 @@ namespace XOCracker
         {
             _isMonitoringRinning = false;
             _monitoringProcess = new Task(Monitoring);
+            _playerSide = CellType.XCell;
             UpdatedCells = new Queue<Cell>();
         }
 

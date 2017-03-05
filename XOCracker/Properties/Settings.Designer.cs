@@ -25,7 +25,7 @@ namespace XOCracker.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("0")]
+        [global::System.Configuration.DefaultSettingValueAttribute("19")]
         public int Rows {
             get {
                 return ((int)(this["Rows"]));
@@ -37,7 +37,7 @@ namespace XOCracker.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("0")]
+        [global::System.Configuration.DefaultSettingValueAttribute("19")]
         public int Columns {
             get {
                 return ((int)(this["Columns"]));
@@ -109,7 +109,7 @@ namespace XOCracker.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("5")]
+        [global::System.Configuration.DefaultSettingValueAttribute("4")]
         public int Accuracy {
             get {
                 return ((int)(this["Accuracy"]));
@@ -121,7 +121,7 @@ namespace XOCracker.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("1")]
+        [global::System.Configuration.DefaultSettingValueAttribute("111111")]
         public int Dispersion {
             get {
                 return ((int)(this["Dispersion"]));
@@ -169,7 +169,7 @@ namespace XOCracker.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("0")]
+        [global::System.Configuration.DefaultSettingValueAttribute("5")]
         public int VinLength {
             get {
                 return ((int)(this["VinLength"]));
@@ -181,7 +181,7 @@ namespace XOCracker.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("50")]
+        [global::System.Configuration.DefaultSettingValueAttribute("1")]
         public int MouseSpeed {
             get {
                 return ((int)(this["MouseSpeed"]));
@@ -193,7 +193,7 @@ namespace XOCracker.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("10000")]
+        [global::System.Configuration.DefaultSettingValueAttribute("0")]
         public int MaxTurnDelay {
             get {
                 return ((int)(this["MaxTurnDelay"]));

@@ -6,6 +6,7 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Drawing;
 using System.Linq;
+using System.Threading;
 using System.Windows;
 using System.Windows.Forms;
 using System.Windows.Interop;
@@ -51,7 +52,7 @@ namespace XOCracker
             _prewParentState = _parentWindow.WindowState;
             _parentWindow.WindowState = WindowState.Minimized;
             Owner = _parentWindow;
-        }
+ }
 
         public Rectangle Rectangle { get; set; }
 
@@ -59,8 +60,10 @@ namespace XOCracker
         {
             base.OnActivated(e);
             _winHandle = new WindowInteropHelper(this).Handle;
+            Thread.Sleep(200);
+            var screen = Screen.FromHandle(new WindowInteropHelper(this).Handle);
+            Background.Source = SearchHelper.BitmapToImageSource(SearchHelper.CaptureScreen(SearchHelper.MagicShift, SearchHelper.MagicShift, screen.Bounds.Width, screen.Bounds.Height, _winHandle));
             NativeMethods.BringFormToFront(_winHandle);
-
         }
 
         protected override void OnClosing(CancelEventArgs e)

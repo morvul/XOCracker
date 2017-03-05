@@ -16,6 +16,7 @@
         <CommandBinding Command="{x:Static xoCracker:ScreenshotRegion.MyCommand}" Executed="AbortCommand"/>
     </Window.CommandBindings>
     <Grid>
+        <Image Name="Background" Margin="0" Stretch="None"/>
         <Canvas Name="Canvas" />
         <Path x:Name="Cnv" Fill="Black" Opacity="0.5" MouseUp="Canvas_MouseUp"/>
     </Grid>
