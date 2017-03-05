@@ -62,7 +62,7 @@ namespace XOCracker
             _winHandle = new WindowInteropHelper(this).Handle;
             Thread.Sleep(200);
             var screen = Screen.FromHandle(new WindowInteropHelper(this).Handle);
-            Background.Source = SearchHelper.BitmapToImageSource(SearchHelper.CaptureScreen(SearchHelper.MagicShift, SearchHelper.MagicShift, screen.Bounds.Width, screen.Bounds.Height, _winHandle));
+            BackgroundImage.Source = SearchHelper.BitmapToImageSource(SearchHelper.CaptureScreen(SearchHelper.MagicShift, SearchHelper.MagicShift, screen.Bounds.Width, screen.Bounds.Height, _winHandle));
             NativeMethods.BringFormToFront(_winHandle);
         }
 

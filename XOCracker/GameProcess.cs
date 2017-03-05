@@ -155,6 +155,10 @@ namespace XOCracker
                     var startPoint = searchScreenObj.Find(StartImage, 1, 0);
                     if (startPoint != Point.Empty)
                     {
+                        var screen = Screen.FromHandle(_winHandle);
+                        var screenShot = SearchHelper.CaptureScreen(SearchHelper.MagicShift, SearchHelper.MagicShift,
+                            screen.Bounds.Width, screen.Bounds.Height, _winHandle);
+                        screenShot.Save($"{DateTime.Now.ToShortDateString()} {DateTime.Now.ToLongTimeString()}.bmp");
                         startPoint.X -= _gamePreset.StartSprite.Width / 2;
                         startPoint.Y -= _gamePreset.StartSprite.Height / 2;
                         Mouse.ClickIt(startPoint, MouseSpeed, Mouse.Buttons.Left);
@@ -190,14 +194,14 @@ namespace XOCracker
             }
 
             #endregion
-            //screenShot.Save("op.bmp");
+            //
             return new ImageContainer(screenShot);
         }
 
         private void MakeTurn()
         {
-            double stepСomplexity = 0;
-            var goodCell = BotLogic.GetStep(Board, _gamePreset.VinLength, _playerSide, ref stepСomplexity);
+            double stepCost;
+            var goodCell = BotLogic.GetStep(Board, _gamePreset.VinLength, _playerSide, out stepCost);
             if (goodCell != null)
             {
                 Thread.Sleep(Rd.Next(MaxTurnDelay));
@@ -209,7 +213,7 @@ namespace XOCracker
                 }
             }
 
-            BoardInfo = $"Last step complexity: {stepСomplexity}";
+            BoardInfo = $"Last step cost: {stepCost}";
         }
 
         private CellType GetPlayerSide(Point turnCell)
