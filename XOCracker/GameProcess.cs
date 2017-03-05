@@ -214,7 +214,11 @@ namespace XOCracker
             var goodCell = BotLogic.GetStep(Board, _gamePreset.VinLength, _playerSide, out stepCost);
             if (goodCell != null)
             {
-                Thread.Sleep(Rd.Next(MaxTurnDelay));
+                if (stepCost >= 4 && stepCost < 100500)
+                {
+                    Thread.Sleep(Rd.Next(MaxTurnDelay));
+                }
+
                 if (IsGameStarted)
                 {
                     ClickCell(goodCell.Value);
